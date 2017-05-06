@@ -16,8 +16,8 @@ You will need to first install [Node.js](http://nodejs.org/download/) and the gr
 
 Download and unpack [The Phaser.js Boilerplate](https://github.com/lukewilde/phaser-js-boilerplate/archive/master.zip). Or alternatively checkout from source:
 
-    git clone git@github.com:lukewilde/phaser-js-boilerplate.git my-sweet-game
-    cd my-sweet-game
+    git clone git@github.com:lukewilde/phaser-js-boilerplate.git the_game
+    cd the_game
     rm -rf .git/
     git init && git add -A && git commit -m "Importing Phaser boilerplate."
 

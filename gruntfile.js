@@ -213,6 +213,7 @@ module.exports = function (grunt) {
     'copy:images',
     'copy:audio',
     'copy:phaserArcade',
+    'copy:phaserP2',
     'connect',
     'open',
     'watch'
