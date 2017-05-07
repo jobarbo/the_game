@@ -2,6 +2,8 @@ var level1 = {};
 
 level1.create = function () {
 
+  this.game.global.life = 3;
+
   var background = this.game.add.sprite(this.game.world.centerX - 10, this.game.world.centerY, 'background');
   background.anchor.setTo(0.5, 0.5);
   background.scale.setTo(3.4, 3.4);
@@ -14,6 +16,23 @@ level1.create = function () {
   this.player.anchor.setTo(0.5, 0.5);
   this.game.physics.arcade.enable(this.player);
 
+  this.life = this.game.add.sprite(this.game.width - 150, 40, 'life');
+  this.life2 = this.game.add.sprite(this.game.width - 110, 40, 'life');
+  this.life3 = this.game.add.sprite(this.game.width - 70, 40, 'life');
+
+  this.emitter = this.game.add.emitter(0, 0, 15);
+  this.emitter.makeParticles('pixel');
+  this.emitter.setYSpeed(-150, 150);
+  this.emitter.setXSpeed(-150, 150);
+  this.emitter.setScale(2, 0, 2, 0, 800);
+  this.emitter.gravity = 0;
+
+  this.enemies = this.game.add.group();
+  this.enemies.enableBody = true;
+  this.enemies.createMultiple(10, 'enemy');
+
+  this.nextEnemy = 0;
+
   // Display the coin
   this.coin = this.game.add.sprite(60, 240, 'coin');
   // Add Arcade physics to the coin
@@ -23,46 +42,73 @@ level1.create = function () {
   this.coin.scale.setTo(0.4, 0.4);
 
   this.coinSound = this.game.add.audio('coin');
+  this.laserSound = this.game.add.audio('laser');
 
   // Create group laser
-  lasers = this.game.add.group();
-  lasers.enableBody = true;
-  lasers.physicsBodyType = Phaser.Physics.ARCADE;
-  lasers.createMultiple(20, 'laser');
-  lasers.callAll('events.onOutOfBounds.add', 'events.onOutOfBounds', this.resetLaser);
-  lasers.callAll('anchor.setTo', 'anchor', 0.5, 1.0);
-  lasers.setAll('checkWorldBounds', true);
+  this.lasers = this.game.add.group();
+  this.lasers.enableBody = true;
+  this.lasers.physicsBodyType = Phaser.Physics.ARCADE;
+  this.lasers.createMultiple(20, 'laser');
+  this.lasers.callAll('events.onOutOfBounds.add', 'events.onOutOfBounds', this.resetLaser);
+  this.lasers.callAll('anchor.setTo', 'anchor', 0.5, 1.0);
+  this.lasers.setAll('checkWorldBounds', true);
 
   // add Spacebar key
   this.keys = [Phaser.KeyCode.SPACEBAR];
   this.phaserKeys = this.game.input.keyboard.addKeys(this.keys);
   this.game.input.keyboard.addKeyCapture(this.keys);
 
+  this.wasd = {
+  	up: this.game.input.keyboard.addKey(Phaser.Keyboard.W),
+  	down: this.game.input.keyboard.addKey(Phaser.Keyboard.S),
+  	left: this.game.input.keyboard.addKey(Phaser.Keyboard.A),
+  	right: this.game.input.keyboard.addKey(Phaser.Keyboard.D)
+  };
+
   cursors = this.game.input.keyboard.createCursorKeys();
 },
 
 level1.update = function () {
 
+	this.game.physics.arcade.overlap(this.player, this.enemies, this.playerDie,
+		null, this);
+	this.game.physics.arcade.overlap(this.lasers, this.enemies, this.enemyDie,
+		null, this);
+	this.game.physics.arcade.overlap(this.player, this.coin, this.takeCoin,
+	null, this);
+
+	if (this.nextEnemy < this.game.time.now) {
+		// Define our variables
+		var start = 4000, end = 1000, score = 100;
+		// Formula to decrease the delay between enemies over time
+		// At first it's 4000ms, then slowly goes to 1000ms
+		var delay = Math.max(
+		start - (start - end) * this.game.global.score / score, end);
+		// Create a new enemy and update the 'nextEnemy' time
+		this.addEnemy();
+		this.nextEnemy = this.game.time.now + delay;
+	}
+
 	// Player movement
-    if (cursors.up.isDown && this.player.body.y > 200)
+    if ( (cursors.up.isDown || this.wasd.up.isDown)  && this.player.body.y > 200)
     {
-        this.player.body.velocity.y = -300;
+        this.player.body.velocity.y = -400;
     }
-    else if (cursors.down.isDown && this.player.body.y < 500)
+    else if ( (cursors.down.isDown || this.wasd.down.isDown) && this.player.body.y < 500)
     {
-        this.player.body.velocity.y = 300;
+        this.player.body.velocity.y = 400;
     }
-    else if (cursors.left.isDown)
+    else if (cursors.left.isDown || this.wasd.left.isDown)
     {
-        this.player.body.velocity.x = -300;
+        this.player.body.velocity.x = -400;
         this.player.body.velocity.y = 0;
-        this.player.angle = -20;
+        this.player.angle = -10;
     }
-    else if (cursors.right.isDown)
+    else if (cursors.right.isDown || this.wasd.right.isDown)
     {
-        this.player.body.velocity.x = 300;
+        this.player.body.velocity.x = 400;
         this.player.body.velocity.y = 0;
-        this.player.angle = 20;
+        this.player.angle = 10;
     }
     else
     {
@@ -80,10 +126,6 @@ level1.update = function () {
 			this.fireLaser();
 		}
 	}
-
-	this.game.physics.arcade.overlap(this.player, this.coin, this.takeCoin,
-	null, this);
-   
 },
 
 level1.startLevel2 = function () {
@@ -95,12 +137,13 @@ level1.resetLaser = function (laser) {
 },
 
 level1.fireLaser = function () {
-	var laser = lasers.getFirstExists(false);
+	var laser = this.lasers.getFirstExists(false);
 	if (laser) {
-		if(this.player.angle == 20){
+		this.laserSound.play();
+		if(this.player.angle == 10){
 			laser.reset(this.player.x + 20, this.player.y - 20);
 		}
-		else if (this.player.angle == -20){
+		else if (this.player.angle == -10){
 			laser.reset(this.player.x - 20, this.player.y - 20);
 		}
 		else{
@@ -112,42 +155,87 @@ level1.fireLaser = function () {
 
 level1.takeCoin = function(player, coin) {
 	this.game.global.score += 5;
-	// Use the new score variable
 	this.scoreLabel.text = 'score: ' + this.game.global.score;
 
 	this.coinSound.play();
-
-	// Scale the coin to 0 to make it invisible
 	this.coin.scale.setTo(0, 0);
-	// Grow the coin back to its original scale in 300ms
 	this.game.add.tween(this.coin.scale).to({x: 0.4, y: 0.4}, 300).start();
 
 	this.game.add.tween(this.player.scale).to({x: 1.3, y: 1.3}, 100)
 	.yoyo(true).start();
 
-
-	// Change the coin position
 	this.updateCoinPosition();
 },
 
 level1.updateCoinPosition = function() {
-	// Store all the possible coin positions in an array
 	var coinPosition = [
-	{x: 140, y: 210}, {x: 360, y: 210}, // Top row
-	{x: 60, y: 240}, {x: 440, y: 240}, // Middle row
-	{x: 130, y: 300}, {x: 370, y: 300} // Bottom row
+		{x: 140, y: 210}, {x: 360, y: 210},
+		{x: 60, y: 340}, {x: 440, y: 340},
+		{x: 130, y: 400}, {x: 370, y: 400}
 	];
-	// Remove the current coin position from the array
-	// Otherwise the coin could appear at the same spot twice in a row
 	for (var i = 0; i < coinPosition.length; i++) {
-	if (coinPosition[i].x == this.coin.x) {
-	coinPosition.splice(i, 1);
+		if (coinPosition[i].x == this.coin.x) {
+			coinPosition.splice(i, 1);
+		}
 	}
-	}
-	// Randomly select a position from the array with 'this.game.rnd.pick'
 	var newPosition = this.game.rnd.pick(coinPosition);
-	// Set the new position of the coin
 	this.coin.reset(newPosition.x, newPosition.y);
+},
+level1.addEnemy = function() {
+	var enemy = this.enemies.getFirstDead();
+	if (!enemy) {
+		return;
+	}
+	enemy.anchor.setTo(0.5, 1);
+	enemy.reset(this.game.rnd.pick([100, 200, 300, 400, 500, 600, 700]), 0);
+	enemy.body.gravity.y = 500;
+	enemy.body.velocity.x = this.game.rnd.pick([0, 50, 100, 200]) * this.game.rnd.pick([-1, 1]);
+	enemy.checkWorldBounds = true;
+	enemy.outOfBoundsKill = true;
+},
+level1.playerDie = function() {
+
+	this.emitter.x = this.player.x;
+	this.emitter.y = this.player.y;
+	this.emitter.start(true, 800, null, 15);
+
+	this.player.kill();
+
+	this.game.global.life -= 1;
+
+	switch(this.game.global.life) {
+	    case 2:
+	    	this.life3.kill();
+	        this.game.time.events.add(1000, this.resetPlayer, this);
+	        break;
+	    case 1:
+	    	this.life2.kill();
+	        this.game.time.events.add(1000, this.resetPlayer, this);
+	        break;
+	    case 0:
+	    	this.life.kill();
+	        this.game.time.events.add(1000, this.startMenu, this);
+	        break;
+	}
+
+
+},
+level1.enemyDie = function(laser, enemy) {
+	enemy.kill();
+
+	this.game.global.score += 10;
+	this.scoreLabel.text = 'score: ' + this.game.global.score;
+
+	this.emitter.x = enemy.x;
+	this.emitter.y = enemy.y;
+	this.emitter.start(true, 800, null, 15);
+
+},
+level1.resetPlayer = function() {
+	this.player.reset(this.game.width/2, this.game.world.centerY + 100);
+},
+level1.startMenu = function() {
+	this.game.state.start('game');
 },
 
 module.exports = level1;

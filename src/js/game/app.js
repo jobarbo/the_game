@@ -11,7 +11,8 @@ var states = {
 var game = new Phaser.Game(properties.size.x, properties.size.y, Phaser.AUTO, 'game');
 
 game.global = {
-	score: 0
+	score: 0,
+	life: 3
 };
 
 // Automatically register each state.
