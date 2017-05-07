@@ -204,8 +204,8 @@ level1.addEnemy = function() {
 	}
 	enemy.anchor.setTo(0.5, 1);
 	enemy.reset(this.game.rnd.pick([100, 200, 300, 400, 500, 600, 700]), 0);
-	enemy.body.gravity.y = 500;
-	enemy.body.velocity.x = this.game.rnd.pick([0, 50, 100, 200]) * this.game.rnd.pick([-1, 1]);
+	enemy.body.velocity.y = this.game.rnd.pick([100, 200]) * this.game.rnd.pick([-1, 1]);
+	enemy.body.velocity.x = this.game.rnd.pick([0, 50]) * this.game.rnd.pick([-1, 1]);
 	enemy.checkWorldBounds = true;
 	enemy.outOfBoundsKill = true;
 },
