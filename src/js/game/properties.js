@@ -6,6 +6,7 @@ module.exports = {
   port: 3017,
   liveReloadPort: 3018,
   mute: false,
+  score: 0,
   showStats: false,
   size: {
     x: 800,
