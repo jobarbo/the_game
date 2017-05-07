@@ -14,7 +14,9 @@ level1.create = function () {
   // Add player
   this.player = this.game.add.sprite(this.game.width/2, this.game.world.centerY + 100, 'player');
   this.player.anchor.setTo(0.5, 0.5);
+  this.player.scale.setTo(0.5,0.5);
   this.game.physics.arcade.enable(this.player);
+  this.player.body.updateBounds(this.player.scale.x, this.player.scale.y);
 
   this.life = this.game.add.sprite(this.game.width - 150, 40, 'life');
   this.life2 = this.game.add.sprite(this.game.width - 110, 40, 'life');
@@ -28,30 +30,44 @@ level1.create = function () {
   this.emitter.gravity = 0;
 
   this.enemies = this.game.add.group();
-  this.enemies.enableBody = true;
   this.enemies.createMultiple(10, 'enemy');
+  //set the scale for each group children instead of the whole group
+  for (i = 0; i <this.enemies.length ; i++) {
+	  this.enemies.children[i].scale.setTo(0.5,0.5);
+  }
+  this.enemies.enableBody = true;
+  this.game.physics.arcade.enable(this.enemies);
 
+
+  
   this.nextEnemy = 0;
 
   // Display the coin
   this.coin = this.game.add.sprite(60, 240, 'coin');
-  // Add Arcade physics to the coin
-  this.game.physics.arcade.enable(this.coin);
+
   // Set the anchor point to its center
   this.coin.anchor.setTo(0.5, 0.5);
-  this.coin.scale.setTo(0.4, 0.4);
+  this.coin.scale.setTo(0.3, 0.3);
+  // Add Arcade physics to the coin
+  this.game.physics.arcade.enable(this.coin);
 
   this.coinSound = this.game.add.audio('coin');
   this.laserSound = this.game.add.audio('laser');
 
   // Create group laser
   this.lasers = this.game.add.group();
-  this.lasers.enableBody = true;
-  this.lasers.physicsBodyType = Phaser.Physics.ARCADE;
+
   this.lasers.createMultiple(20, 'laser');
+  //set the scale for each group children instead of the whole group
+  for (i = 0; i <this.lasers.length ; i++) {
+	  	this.lasers.children[i].scale.setTo(0.5,0.5);
+  }
   this.lasers.callAll('events.onOutOfBounds.add', 'events.onOutOfBounds', this.resetLaser);
   this.lasers.callAll('anchor.setTo', 'anchor', 0.5, 1.0);
   this.lasers.setAll('checkWorldBounds', true);
+  this.game.physics.arcade.enable(this.lasers);
+  this.lasers.enableBody = true;
+ 
 
   // add Spacebar key
   this.keys = [Phaser.KeyCode.SPACEBAR];
@@ -161,7 +177,7 @@ level1.takeCoin = function(player, coin) {
 	this.coin.scale.setTo(0, 0);
 	this.game.add.tween(this.coin.scale).to({x: 0.4, y: 0.4}, 300).start();
 
-	this.game.add.tween(this.player.scale).to({x: 1.3, y: 1.3}, 100)
+	this.game.add.tween(this.player.scale).to({x: 0.7, y: 0.7}, 100)
 	.yoyo(true).start();
 
 	this.updateCoinPosition();
@@ -214,6 +230,7 @@ level1.playerDie = function() {
 	        break;
 	    case 0:
 	    	this.life.kill();
+			this.game.global.score = 0;
 	        this.game.time.events.add(1000, this.startMenu, this);
 	        break;
 	}
@@ -235,7 +252,7 @@ level1.resetPlayer = function() {
 	this.player.reset(this.game.width/2, this.game.world.centerY + 100);
 },
 level1.startMenu = function() {
-	this.game.state.start('game');
+	this.game.state.start('mainTitle');
 },
 
 module.exports = level1;
