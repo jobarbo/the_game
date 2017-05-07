@@ -2,6 +2,13 @@ var Stats = require('../../lib/stats.min');
 var properties = require('../properties');
 var boot = {};
 
+boot.init = function () {
+  this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+  this.game.scale.pageAlignVertically = true; 
+  this.game.scale.pageAlignHorizontally = true;
+
+}
+
 boot.create = function () {
 
   if (properties.showStats) {
