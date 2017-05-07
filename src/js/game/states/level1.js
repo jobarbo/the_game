@@ -17,6 +17,9 @@ level1.create = function () {
   this.player.scale.setTo(0.5,0.5);
   this.game.physics.arcade.enable(this.player);
   this.player.body.updateBounds(this.player.scale.x, this.player.scale.y);
+  this.player.body.drag.set(100);
+  this.player.body.maxVelocity.set(200);
+
 
   this.life = this.game.add.sprite(this.game.width - 150, 40, 'life');
   this.life2 = this.game.add.sprite(this.game.width - 110, 40, 'life');
@@ -38,8 +41,6 @@ level1.create = function () {
   this.enemies.enableBody = true;
   this.game.physics.arcade.enable(this.enemies);
 
-
-  
   this.nextEnemy = 0;
 
   // Display the coin
@@ -108,28 +109,29 @@ level1.update = function () {
 	// Player movement
     if ( (cursors.up.isDown || this.wasd.up.isDown)  && this.player.body.y > 200)
     {
-        this.player.body.velocity.y = -400;
+        //this.player.body.velocity.y = -400;
+		this.player.body.acceleration.y = -100;
     }
     else if ( (cursors.down.isDown || this.wasd.down.isDown) && this.player.body.y < 500)
     {
-        this.player.body.velocity.y = 400;
+        this.player.body.acceleration.y = 100;
     }
     else if (cursors.left.isDown || this.wasd.left.isDown)
     {
-        this.player.body.velocity.x = -400;
-        this.player.body.velocity.y = 0;
+        this.player.body.acceleration.x = -100;
+        this.player.body.acceleration.y = 0;
         this.player.angle = -10;
     }
     else if (cursors.right.isDown || this.wasd.right.isDown)
     {
-        this.player.body.velocity.x = 400;
-        this.player.body.velocity.y = 0;
+        this.player.body.acceleration.x =100;
+        this.player.body.acceleration.y = 0;
         this.player.angle = 10;
     }
     else
     {
-		this.player.body.velocity.x = 0;
-		this.player.body.velocity.y = 0;
+		this.player.body.acceleration.x = 0;
+		this.player.body.acceleration.y = 0;
 		this.player.angle = 0;
 	}
 
