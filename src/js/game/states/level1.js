@@ -113,7 +113,7 @@ level1.update = function () {
 
 	if (this.nextEnemy < this.game.time.now) {
 		// Define our variables
-		var start = 2000, end = 1000, score = 100;
+		var start = 500, end = 200, score = 100;
 		// Formula to decrease the delay between enemies over time
 		// At first it's 4000ms, then slowly goes to 1000ms
 		var delay = Math.max(

@@ -22,6 +22,25 @@ game.create = function () {
   this.phaserKeys = this.game.input.keyboard.addKeys(this.keys);
   this.game.input.keyboard.addKeyCapture(this.keys);
 
+  // If 'bestScore' is not defined
+  // It means that this is the first time the game is played
+  if (!localStorage.getItem('bestScore')) {
+    // Then set the best score to 0
+    localStorage.setItem('bestScore', 0);
+  }
+  // If the score is higher than the best score
+  if (this.game.global.score > localStorage.getItem('bestScore')) {
+    // Then update the best score
+    localStorage.setItem('bestScore', this.game.global.score);
+  }
+
+
+  var text = 'score: ' + this.game.global.score + '\nbest score: ' +
+  localStorage.getItem('bestScore');
+  var scoreLabel = this.game.add.text(this.game.width/2, this.game.height/2+ 90, text,
+  { font: '25px Arial', fill: '#ffffff', align: 'center' });
+  scoreLabel.anchor.setTo(0.5, 0.5);
+
 },
 
 game.update = function () {
