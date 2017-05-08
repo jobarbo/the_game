@@ -3,6 +3,8 @@ var level1 = {};
 level1.create = function () {
 
   this.game.global.life = 3;
+  this.playerShield = false;
+  this.shieldDropped = false;
 
   var background = this.game.add.sprite(this.game.world.centerX - 10, this.game.world.centerY, 'background');
   background.anchor.setTo(0.5, 0.5);
@@ -52,6 +54,14 @@ level1.create = function () {
   // Add Arcade physics to the coin
   this.game.physics.arcade.enable(this.coin);
 
+  /*this.coin.animations.add('spin', [
+  	'images/collectables/coin/gold_1.png', 
+  	'images/collectables/coin/gold_2.png', 
+  	'images/collectables/coin/gold_3.png',
+  	'images/collectables/coin/gold_4.png'],
+    15, true);
+  this.coin.animations.play('spin');*/
+
   this.coinSound = this.game.add.audio('coin');
   this.laserSound = this.game.add.audio('laser');
 
@@ -83,6 +93,8 @@ level1.create = function () {
   };
 
   cursors = this.game.input.keyboard.createCursorKeys();
+
+  this.shield = null;
 },
 
 level1.update = function () {
@@ -94,9 +106,14 @@ level1.update = function () {
 	this.game.physics.arcade.overlap(this.player, this.coin, this.takeCoin,
 	null, this);
 
+	if(this.star!=null){
+		this.game.physics.arcade.overlap(this.player, this.star, this.takeStar,
+		null, this);
+	}
+
 	if (this.nextEnemy < this.game.time.now) {
 		// Define our variables
-		var start = 4000, end = 1000, score = 100;
+		var start = 2000, end = 1000, score = 100;
 		// Formula to decrease the delay between enemies over time
 		// At first it's 4000ms, then slowly goes to 1000ms
 		var delay = Math.max(
@@ -110,21 +127,21 @@ level1.update = function () {
     if ( (cursors.up.isDown || this.wasd.up.isDown)  && this.player.body.y > 200)
     {
         //this.player.body.velocity.y = -400;
-		this.player.body.acceleration.y = -100;
+		this.player.body.acceleration.y = -400;
     }
     else if ( (cursors.down.isDown || this.wasd.down.isDown) && this.player.body.y < 500)
     {
-        this.player.body.acceleration.y = 100;
+        this.player.body.acceleration.y = 400;
     }
     else if (cursors.left.isDown || this.wasd.left.isDown)
     {
-        this.player.body.acceleration.x = -100;
+        this.player.body.acceleration.x = -400;
         this.player.body.acceleration.y = 0;
         this.player.angle = -10;
     }
     else if (cursors.right.isDown || this.wasd.right.isDown)
     {
-        this.player.body.acceleration.x =100;
+        this.player.body.acceleration.x =400;
         this.player.body.acceleration.y = 0;
         this.player.angle = 10;
     }
@@ -144,6 +161,13 @@ level1.update = function () {
 			this.fireLaser();
 		}
 	}
+
+	if(this.shield != null){
+		this.game.physics.arcade.overlap(this.shield, this.enemies, this.enemyDie,
+			null, this);
+		this.game.world.wrap(this.shield, 0, true);
+		this.game.physics.arcade.moveToObject(this.shield, this.player, 50, 50);
+	}
 },
 
 level1.startLevel2 = function () {
@@ -159,10 +183,10 @@ level1.fireLaser = function () {
 	if (laser) {
 		this.laserSound.play();
 		if(this.player.angle == 10){
-			laser.reset(this.player.x + 20, this.player.y - 20);
+			laser.reset(this.player.x + 5, this.player.y - 20);
 		}
 		else if (this.player.angle == -10){
-			laser.reset(this.player.x - 20, this.player.y - 20);
+			laser.reset(this.player.x - 5, this.player.y - 20);
 		}
 		else{
 			laser.reset(this.player.x, this.player.y - 20);
@@ -183,6 +207,21 @@ level1.takeCoin = function(player, coin) {
 	.yoyo(true).start();
 
 	this.updateCoinPosition();
+},
+
+level1.takeStar = function(player, star) {
+
+	this.coinSound.play();
+	star.kill();
+
+	this.playerShield = true;
+
+	this.shield = this.game.add.sprite(this.player.x + 30, this.player.y - 30, 'shield');
+	this.game.physics.arcade.enable(this.shield);
+	this.shield.anchor.setTo(0.5, 0.5);
+
+	this.game.time.events.add(10000, this.removeShield, this);
+
 },
 
 level1.updateCoinPosition = function() {
@@ -240,7 +279,24 @@ level1.playerDie = function() {
 
 },
 level1.enemyDie = function(laser, enemy) {
+	enemyX = enemy.x;
+	enemyY = enemy.y;
 	enemy.kill();
+
+	number = this.game.rnd.pick([1, 2, 3 , 4, 5]);
+
+	if(number == 5 && this.playerShield == false && this.shieldDropped == false){
+		// Display the star
+
+		this.shieldDropped = true;
+		this.star = this.game.add.sprite(enemyX, enemyY, 'star');
+
+		// Set the anchor point to its center
+		this.star.anchor.setTo(0.5, 0.5);
+		this.star.scale.setTo(0.8, 0.8);
+		// Add Arcade physics to the star
+		this.game.physics.arcade.enable(this.star);
+	}
 
 	this.game.global.score += 10;
 	this.scoreLabel.text = 'score: ' + this.game.global.score;
@@ -256,5 +312,11 @@ level1.resetPlayer = function() {
 level1.startMenu = function() {
 	this.game.state.start('mainTitle');
 },
+level1.removeShield = function() {
+	this.shield.kill();
+	this.playerShield = false;
+	this.shieldDropped = false;
+},
+
 
 module.exports = level1;
