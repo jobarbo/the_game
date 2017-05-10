@@ -20,7 +20,7 @@ level1.create = function () {
   this.game.physics.arcade.enable(this.player);
   this.player.body.updateBounds(this.player.scale.x, this.player.scale.y);
   this.player.body.drag.set(100);
-  this.player.body.maxVelocity.set(200);
+  this.player.body.maxVelocity.set(600);
 
 
   this.life = this.game.add.sprite(this.game.width - 150, 40, 'life');
@@ -124,14 +124,16 @@ level1.update = function () {
 	}
 
 	// Player movement
+	console.log(this.player.body.y);
     if ( (cursors.up.isDown || this.wasd.up.isDown)  && this.player.body.y > 200)
     {
-        //this.player.body.velocity.y = -400;
 		this.player.body.acceleration.y = -400;
+		this.player.angle = 0;
     }
     else if ( (cursors.down.isDown || this.wasd.down.isDown) && this.player.body.y < 500)
     {
         this.player.body.acceleration.y = 400;
+		this.player.angle = 0;
     }
     else if (cursors.left.isDown || this.wasd.left.isDown)
     {
@@ -141,7 +143,7 @@ level1.update = function () {
     }
     else if (cursors.right.isDown || this.wasd.right.isDown)
     {
-        this.player.body.acceleration.x =400;
+        this.player.body.acceleration.x = 400;
         this.player.body.acceleration.y = 0;
         this.player.angle = 10;
     }
