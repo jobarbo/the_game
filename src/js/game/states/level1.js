@@ -174,10 +174,12 @@ level1.update = function () {
 	this.game.world.wrap(this.player, 0, true);
 
 	// Fire laser event
-	for (var index in this.phaserKeys) {
-		var key = this.phaserKeys[index];
-		if (key.justDown) {
-			this.fireLaser();
+	if(this.player.alive){
+		for (var index in this.phaserKeys) {
+			var key = this.phaserKeys[index];
+			if (key.justDown) {
+				this.fireLaser();
+			}
 		}
 	}
 
