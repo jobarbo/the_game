@@ -3,6 +3,7 @@ var level1 = {};
 level1.create = function () {
 
   this.game.global.life = 3;
+  this.game.global.score = 0;
   this.playerBonus = '';
   this.bonusDropped = false;
 
@@ -359,7 +360,6 @@ level1.playerDie = function() {
 	        break;
 	    case 0:
 	    	this.life.kill();
-			this.game.global.score = 0;
 	        this.game.time.events.add(1000, this.startMenu, this);
 	        break;
 	}
