@@ -12,6 +12,7 @@ preloader.preload = function () {
   this.game.load.image('enemy', 'images/ennemies/enemyRed2.png');
   this.game.load.image('pixel', 'images/pixel.png');
   this.game.load.image('shield', 'images/shield.png');
+  this.game.load.image('multiammo', 'images/collectables/star_gold.png');
 
   this.game.load.audio('coin', 'audio/powerup.mp3');
   this.game.load.audio('laser', 'audio/laser.mp3');
