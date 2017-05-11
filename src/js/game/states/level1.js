@@ -372,6 +372,7 @@ level1.playerDie = function() {
 		        break;
 		}
 		this.stopBonus();
+		this.player.alpha = 0.1;
 		this.toggleInvincible();
 		this.game.time.events.add(2500, this.toggleInvincible, this);
 	}
@@ -430,6 +431,9 @@ level1.stopBonus = function() {
 },
 level1.toggleInvincible = function() {
 	this.player.invincible = !this.player.invincible;
+	if(!this.player.invincible){
+		this.player.alpha = 1;
+	}
 }
 
 module.exports = level1;
