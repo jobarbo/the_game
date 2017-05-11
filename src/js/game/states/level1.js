@@ -7,9 +7,10 @@ level1.create = function () {
   this.playerBonus = '';
   this.bonusDropped = false;
 
-  var background = this.game.add.sprite(this.game.world.centerX - 10, this.game.world.centerY, 'background');
-  background.anchor.setTo(0.5, 0.5);
-  background.scale.setTo(3.4, 3.4);
+  //var background = this.game.add.sprite(this.game.world.centerX - 10, this.game.world.centerY, 'background');
+  this.background = this.game.add.tileSprite(this.game.world.centerX - 10, this.game.world.centerY, 800, 600, 'background');
+  this.background.anchor.setTo(0.5, 0.5);
+  this.background.scale.setTo(3.4, 3.4);
 
   this.scoreLabel = this.game.add.text(50, 50, 'score: 0',
 		{ font: '22px Arial', fill: '#ffffff' });
@@ -22,6 +23,7 @@ level1.create = function () {
   this.player.body.updateBounds(this.player.scale.x, this.player.scale.y);
   this.player.body.drag.set(100);
   this.player.body.maxVelocity.set(600);
+  this.player.invincible = false;
 
 
   this.life = this.game.add.sprite(this.game.width - 150, 40, 'life');
@@ -35,6 +37,16 @@ level1.create = function () {
   this.emitter.setScale(2, 0, 2, 0, 800);
   this.emitter.gravity = 0;
 
+
+  this.meteors = this.game.add.group();
+  this.meteors.createMultiple(10, 'meteor');
+  for (i = 0; i <this.meteors.length ; i++) {
+  	this.meteors.children[i].scale.setTo(0.8,0.8);
+  }
+  this.meteors.enableBody = true;
+  this.game.physics.arcade.enable(this.meteors);
+  this.nextMeteor = 0;
+
   this.enemies = this.game.add.group();
   this.enemies.createMultiple(10, 'enemy');
   for (i = 0; i <this.enemies.length ; i++) {
@@ -44,15 +56,6 @@ level1.create = function () {
   this.game.physics.arcade.enable(this.enemies);
 
   this.nextEnemy = 0;
-
-  this.meteors = this.game.add.group();
-  this.meteors.createMultiple(10, 'meteor');
-  for (i = 0; i <this.meteors.length ; i++) {
-  	//this.meteors.children[i].scale.setTo(0.5,0.5);
-  }
-  this.meteors.enableBody = true;
-  this.game.physics.arcade.enable(this.meteors);
-  this.nextMeteor = 0;
 
   // Display the coin
   this.coin = this.game.add.sprite(60, 240, 'coin');
@@ -100,6 +103,8 @@ level1.create = function () {
 
 level1.update = function () {
 
+	this.background.tilePosition.y += 1;
+
 	this.game.physics.arcade.overlap(this.player, this.enemies, this.playerDie,
 		null, this);
 	this.game.physics.arcade.overlap(this.player, this.meteors, this.playerDie,
@@ -120,7 +125,7 @@ level1.update = function () {
 
 	// Meteors spawn
 	if (this.nextMeteor < this.game.time.now) {
-		var start = 2000, end = 1000, score = 100;
+		var start = 3000, end = 1500, score = 100;
 		var delay = Math.max(
 		start - (start - end) * this.game.global.score / score, end);
 		this.addMeteor();
@@ -129,7 +134,7 @@ level1.update = function () {
 
 	// Ennemies spawn
 	if (this.nextEnemy < this.game.time.now) {
-		var start = 1500, end = 800, score = 100;
+		var start = 2500, end = 1500, score = 100;
 		var delay = Math.max(
 		start - (start - end) * this.game.global.score / score, end);
 		this.addEnemy();
@@ -327,13 +332,13 @@ level1.addMeteor = function() {
 	var direction = this.game.rnd.pick(['horizontal', 'vertical']); 
 	if(direction == 'vertical'){
 		meteor.reset(this.game.rnd.pick([200, 300, 400, 500, 600]), 0);
-		meteor.body.velocity.y = this.game.rnd.pick([100, 200]);
-		meteor.body.velocity.x = this.game.rnd.pick([0, 50, 100, 150]) * this.game.rnd.pick([-1, 1]);
+		meteor.body.velocity.y = this.game.rnd.pick([100, 150]);
+		meteor.body.velocity.x = this.game.rnd.pick([0, 50, 100]) * this.game.rnd.pick([-1, 1]);
 	}
 	else{
 		meteor.reset(0, this.game.rnd.pick([200, 300, 400]));
-		meteor.body.velocity.y = this.game.rnd.pick([25, 50, 75, 100]) * this.game.rnd.pick([-1, 1]);
-		meteor.body.velocity.x = this.game.rnd.pick([100, 200]);
+		meteor.body.velocity.y = this.game.rnd.pick([25, 50, 75]) * this.game.rnd.pick([-1, 1]);
+		meteor.body.velocity.x = this.game.rnd.pick([100, 150]);
 	}
 	
 	meteor.checkWorldBounds = true;
@@ -341,27 +346,32 @@ level1.addMeteor = function() {
 },
 level1.playerDie = function() {
 
-	this.emitter.x = this.player.x;
-	this.emitter.y = this.player.y;
-	this.emitter.start(true, 800, null, 15);
+	if(!this.player.invincible){
+		this.emitter.x = this.player.x;
+		this.emitter.y = this.player.y;
+		this.emitter.start(true, 800, null, 15);
 
-	this.player.kill();
+		this.player.kill();
 
-	this.game.global.life -= 1;
+		this.game.global.life -= 1;
 
-	switch(this.game.global.life) {
-	    case 2:
-	    	this.life3.kill();
-	        this.game.time.events.add(1000, this.resetPlayer, this);
-	        break;
-	    case 1:
-	    	this.life2.kill();
-	        this.game.time.events.add(1000, this.resetPlayer, this);
-	        break;
-	    case 0:
-	    	this.life.kill();
-	        this.game.time.events.add(1000, this.startMenu, this);
-	        break;
+		switch(this.game.global.life) {
+		    case 2:
+		    	this.life3.kill();
+		        this.game.time.events.add(1000, this.resetPlayer, this);
+		        break;
+		    case 1:
+		    	this.life2.kill();
+		        this.game.time.events.add(1000, this.resetPlayer, this);
+		        break;
+		    case 0:
+		    	this.life.kill();
+		        this.game.time.events.add(1000, this.startMenu, this);
+		        break;
+		}
+		this.stopBonus();
+		this.toggleInvincible();
+		this.game.time.events.add(2500, this.toggleInvincible, this);
 	}
 },
 level1.enemyDie = function(laser, enemy) {
@@ -416,6 +426,8 @@ level1.stopBonus = function() {
 	this.playerBonus = '';
 	this.bonusDropped = false;
 },
-
+level1.toggleInvincible = function() {
+	this.player.invincible = !this.player.invincible;
+}
 
 module.exports = level1;
