@@ -371,17 +371,16 @@ level1.enemyDie = function(laser, enemy) {
 
 	number = this.game.rnd.pick([1, 2, 3 , 4, 5]);
 	if(this.playerBonus == '' && this.bonusDropped == false){
-
-		this.bonusDropped = true;
-
 		switch(number){
 			case 5 :
+				this.bonusDropped = true;
 				this.star = this.game.add.sprite(enemyX, enemyY, 'star');
 				this.star.anchor.setTo(0.5, 0.5);
 				this.star.scale.setTo(0.8, 0.8);
 				this.game.physics.arcade.enable(this.star);
 				break;
 			case 4 :
+				this.bonusDropped = true;
 				this.multiammo = this.game.add.sprite(enemyX, enemyY, 'multiammo');
 				this.multiammo.anchor.setTo(0.5, 0.5);
 				this.multiammo.scale.setTo(0.8, 0.8);
