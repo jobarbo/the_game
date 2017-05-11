@@ -36,7 +36,6 @@ level1.create = function () {
 
   this.enemies = this.game.add.group();
   this.enemies.createMultiple(10, 'enemy');
-  //set the scale for each group children instead of the whole group
   for (i = 0; i <this.enemies.length ; i++) {
 	  this.enemies.children[i].scale.setTo(0.5,0.5);
   }
@@ -44,6 +43,15 @@ level1.create = function () {
   this.game.physics.arcade.enable(this.enemies);
 
   this.nextEnemy = 0;
+
+  this.meteors = this.game.add.group();
+  this.meteors.createMultiple(10, 'meteor');
+  for (i = 0; i <this.meteors.length ; i++) {
+  	//this.meteors.children[i].scale.setTo(0.5,0.5);
+  }
+  this.meteors.enableBody = true;
+  this.game.physics.arcade.enable(this.meteors);
+  this.nextMeteor = 0;
 
   // Display the coin
   this.coin = this.game.add.sprite(60, 240, 'coin');
@@ -93,6 +101,8 @@ level1.update = function () {
 
 	this.game.physics.arcade.overlap(this.player, this.enemies, this.playerDie,
 		null, this);
+	this.game.physics.arcade.overlap(this.player, this.meteors, this.playerDie,
+		null, this);
 	this.game.physics.arcade.overlap(this.lasers, this.enemies, this.enemyDie,
 		null, this);
 	this.game.physics.arcade.overlap(this.player, this.coin, this.takeCoin,
@@ -107,14 +117,20 @@ level1.update = function () {
 		null, this);
 	}
 
-	if (this.nextEnemy < this.game.time.now) {
-		// Define our variables
-		var start = 1000, end = 500, score = 100;
-		// Formula to decrease the delay between enemies over time
-		// At first it's 4000ms, then slowly goes to 1000ms
+	// Meteors spawn
+	if (this.nextMeteor < this.game.time.now) {
+		var start = 2000, end = 1000, score = 100;
 		var delay = Math.max(
 		start - (start - end) * this.game.global.score / score, end);
-		// Create a new enemy and update the 'nextEnemy' time
+		this.addMeteor();
+		this.nextMeteor = this.game.time.now + delay;
+	}
+
+	// Ennemies spawn
+	if (this.nextEnemy < this.game.time.now) {
+		var start = 1500, end = 800, score = 100;
+		var delay = Math.max(
+		start - (start - end) * this.game.global.score / score, end);
 		this.addEnemy();
 		this.nextEnemy = this.game.time.now + delay;
 	}
@@ -161,6 +177,8 @@ level1.update = function () {
 
 	if(this.shield != null){
 		this.game.physics.arcade.overlap(this.shield, this.enemies, this.enemyDie,
+			null, this);
+		this.game.physics.arcade.overlap(this.shield, this.meteors, this.enemyDie,
 			null, this);
 		this.game.world.wrap(this.shield, 0, true);
 		this.game.physics.arcade.moveToObject(this.shield, this.player, 50, 50);
@@ -285,10 +303,40 @@ level1.addEnemy = function() {
 	}
 	enemy.anchor.setTo(0.5, 1);
 	enemy.reset(this.game.rnd.pick([100, 200, 300, 400, 500, 600, 700]), 0);
-	enemy.body.velocity.y = this.game.rnd.pick([100, 200]) * this.game.rnd.pick([-1, 1]);
-	enemy.body.velocity.x = this.game.rnd.pick([0, 50]) * this.game.rnd.pick([-1, 1]);
+
+	this.game.physics.arcade.moveToObject(enemy, this.player, 200);
+	//enemy.body.velocity.y = this.game.rnd.pick([100, 200]) * this.game.rnd.pick([-1, 1]);
+	//enemy.body.velocity.x = this.game.rnd.pick([0, 50]) * this.game.rnd.pick([-1, 1]);
 	enemy.checkWorldBounds = true;
 	enemy.outOfBoundsKill = true;
+},
+level1.addMeteor = function() {
+	var meteor = this.meteors.getFirstDead();
+	if (!meteor) {
+		return;
+	}
+
+	var key = this.game.rnd.pick(['meteor_grey_med', 'meteor_grey', 'meteor_med', 'meteor']);
+	var angle = this.game.rnd.pick([0,20,40,60,80,100]);
+	meteor.key = key;
+	meteor.loadTexture(key, 0);
+	meteor.anchor.setTo(0.5, 1);
+	meteor.angle = angle;
+
+	var direction = this.game.rnd.pick(['horizontal', 'vertical']); 
+	if(direction == 'vertical'){
+		meteor.reset(this.game.rnd.pick([200, 300, 400, 500, 600]), 0);
+		meteor.body.velocity.y = this.game.rnd.pick([100, 200]);
+		meteor.body.velocity.x = this.game.rnd.pick([0, 50, 100, 150]) * this.game.rnd.pick([-1, 1]);
+	}
+	else{
+		meteor.reset(0, this.game.rnd.pick([200, 300, 400]));
+		meteor.body.velocity.y = this.game.rnd.pick([25, 50, 75, 100]) * this.game.rnd.pick([-1, 1]);
+		meteor.body.velocity.x = this.game.rnd.pick([100, 200]);
+	}
+	
+	meteor.checkWorldBounds = true;
+	meteor.outOfBoundsKill = true;
 },
 level1.playerDie = function() {
 
@@ -334,16 +382,13 @@ level1.enemyDie = function(laser, enemy) {
 				this.game.physics.arcade.enable(this.star);
 				break;
 			case 4 :
-				this.star = this.game.add.sprite(enemyX, enemyY, 'star');
-				this.star.anchor.setTo(0.5, 0.5);
-				this.star.scale.setTo(0.8, 0.8);
-				this.game.physics.arcade.enable(this.star);
-				break;
-			default: 
 				this.multiammo = this.game.add.sprite(enemyX, enemyY, 'multiammo');
 				this.multiammo.anchor.setTo(0.5, 0.5);
 				this.multiammo.scale.setTo(0.8, 0.8);
 				this.game.physics.arcade.enable(this.multiammo);
+				break;
+			default: 
+				// À voir
 				break;    
 		}
 	}

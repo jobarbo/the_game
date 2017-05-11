@@ -13,6 +13,10 @@ preloader.preload = function () {
   this.game.load.image('pixel', 'images/pixel.png');
   this.game.load.image('shield', 'images/shield.png');
   this.game.load.image('multiammo', 'images/collectables/star_gold.png');
+  this.game.load.image('meteor', 'images/meteor/meteor_brown_big.png');
+  this.game.load.image('meteor_med', 'images/meteor/meteor_brown_med.png');
+  this.game.load.image('meteor_grey', 'images/meteor/meteor_grey_big.png');
+  this.game.load.image('meteor_grey_med', 'images/meteor/meteor_grey_big.png');
 
   this.game.load.audio('coin', 'audio/powerup.mp3');
   this.game.load.audio('laser', 'audio/laser.mp3');
