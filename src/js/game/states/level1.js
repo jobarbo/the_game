@@ -7,7 +7,6 @@ level1.create = function () {
   this.playerBonus = '';
   this.bonusDropped = false;
 
-  //var background = this.game.add.sprite(this.game.world.centerX - 10, this.game.world.centerY, 'background');
   this.background = this.game.add.tileSprite(this.game.world.centerX - 10, this.game.world.centerY, 800, 600, 'background');
   this.background.anchor.setTo(0.5, 0.5);
   this.background.scale.setTo(3.4, 3.4);
@@ -109,6 +108,8 @@ level1.update = function () {
 		null, this);
 	this.game.physics.arcade.overlap(this.player, this.meteors, this.playerDie,
 		null, this);
+	this.game.physics.arcade.overlap(this.lasers, this.meteors, this.touchMeteor,
+		null, this);
 	this.game.physics.arcade.overlap(this.lasers, this.enemies, this.enemyDie,
 		null, this);
 	this.game.physics.arcade.overlap(this.player, this.coin, this.takeCoin,
@@ -186,7 +187,7 @@ level1.update = function () {
 	if(this.shield != null){
 		this.game.physics.arcade.overlap(this.shield, this.enemies, this.enemyDie,
 			null, this);
-		this.game.physics.arcade.overlap(this.shield, this.meteors, this.enemyDie,
+		this.game.physics.arcade.overlap(this.shield, this.meteors, this.hitMeteor,
 			null, this);
 		this.game.world.wrap(this.shield, 0, true);
 		this.game.physics.arcade.moveToObject(this.shield, this.player, 50, 50);
@@ -310,6 +311,7 @@ level1.addEnemy = function() {
 		return;
 	}
 	enemy.anchor.setTo(0.5, 1);
+	enemy.healthPoint = 20;
 	enemy.reset(this.game.rnd.pick([100, 200, 300, 400, 500, 600, 700]), 0);
 
 	enemy.rotation = this.game.physics.arcade.angleBetween(enemy, this.player) - 1.5;
@@ -379,42 +381,50 @@ level1.playerDie = function() {
 level1.enemyDie = function(sprite, enemy) {
 	enemyX = enemy.x;
 	enemyY = enemy.y;
-	enemy.kill();
 
 	if(sprite.key == 'laser'){
 		sprite.kill();
 	}
 
-	number = this.game.rnd.pick([1, 2, 3 , 4, 5]);
-	if(this.playerBonus == '' && this.bonusDropped == false){
-		switch(number){
-			case 5 :
-				this.bonusDropped = true;
-				this.star = this.game.add.sprite(enemyX, enemyY, 'star');
-				this.star.anchor.setTo(0.5, 0.5);
-				this.star.scale.setTo(0.8, 0.8);
-				this.game.physics.arcade.enable(this.star);
-				break;
-			case 4 :
-				this.bonusDropped = true;
-				this.multiammo = this.game.add.sprite(enemyX, enemyY, 'multiammo');
-				this.multiammo.anchor.setTo(0.5, 0.5);
-				this.multiammo.scale.setTo(0.8, 0.8);
-				this.game.physics.arcade.enable(this.multiammo);
-				break;
-			default: 
-				// À voir
-				break;    
+	enemy.healthPoint -= 10;
+
+	if(enemy.healthPoint <= 0){
+		enemy.kill();
+
+		number = this.game.rnd.pick([1, 2, 3 , 4, 5]);
+		if(this.playerBonus == '' && this.bonusDropped == false){
+			switch(number){
+				case 5 :
+					this.bonusDropped = true;
+					this.star = this.game.add.sprite(enemyX, enemyY, 'star');
+					this.star.anchor.setTo(0.5, 0.5);
+					this.star.scale.setTo(0.8, 0.8);
+					this.game.physics.arcade.enable(this.star);
+					break;
+				case 4 :
+					this.bonusDropped = true;
+					this.multiammo = this.game.add.sprite(enemyX, enemyY, 'multiammo');
+					this.multiammo.anchor.setTo(0.5, 0.5);
+					this.multiammo.scale.setTo(0.8, 0.8);
+					this.game.physics.arcade.enable(this.multiammo);
+					break;
+				default: 
+					// À voir
+					break;    
+			}
 		}
+
+		this.game.global.score += 10;
+		this.scoreLabel.text = 'score: ' + this.game.global.score;
+
+		this.emitter.x = enemy.x;
+		this.emitter.y = enemy.y;
+		this.emitter.start(true, 800, null, 15);
 	}
 
-	this.game.global.score += 10;
-	this.scoreLabel.text = 'score: ' + this.game.global.score;
-
-	this.emitter.x = enemy.x;
-	this.emitter.y = enemy.y;
-	this.emitter.start(true, 800, null, 15);
-
+},
+level1.hitMeteor = function(shield, meteor) {
+	meteor.kill();
 },
 level1.resetPlayer = function() {
 	this.player.reset(this.game.width/2, this.game.world.centerY + 100);
@@ -426,9 +436,6 @@ level1.stopBonus = function() {
 	if(this.shield != null){
 		this.shield.kill();
 	}
-	else if(this.multiammo != null){
-		this.multiammo.kill();
-	}
 	this.playerBonus = '';
 	this.bonusDropped = false;
 },
@@ -437,6 +444,9 @@ level1.toggleInvincible = function() {
 	if(!this.player.invincible){
 		this.player.alpha = 1;
 	}
+},
+level1.touchMeteor = function(laser, meteor) {
+	laser.kill();
 }
 
 module.exports = level1;
