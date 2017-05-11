@@ -312,9 +312,8 @@ level1.addEnemy = function() {
 	enemy.anchor.setTo(0.5, 1);
 	enemy.reset(this.game.rnd.pick([100, 200, 300, 400, 500, 600, 700]), 0);
 
+	enemy.rotation = this.game.physics.arcade.angleBetween(enemy, this.player) - 1.5;
 	this.game.physics.arcade.moveToObject(enemy, this.player, 200);
-	//enemy.body.velocity.y = this.game.rnd.pick([100, 200]) * this.game.rnd.pick([-1, 1]);
-	//enemy.body.velocity.x = this.game.rnd.pick([0, 50]) * this.game.rnd.pick([-1, 1]);
 	enemy.checkWorldBounds = true;
 	enemy.outOfBoundsKill = true;
 },
@@ -377,10 +376,14 @@ level1.playerDie = function() {
 		this.game.time.events.add(2500, this.toggleInvincible, this);
 	}
 },
-level1.enemyDie = function(laser, enemy) {
+level1.enemyDie = function(sprite, enemy) {
 	enemyX = enemy.x;
 	enemyY = enemy.y;
 	enemy.kill();
+
+	if(sprite.key == 'laser'){
+		sprite.kill();
+	}
 
 	number = this.game.rnd.pick([1, 2, 3 , 4, 5]);
 	if(this.playerBonus == '' && this.bonusDropped == false){
