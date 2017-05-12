@@ -452,7 +452,7 @@ level2.touchMeteor = function(laser, meteor) {
 level2.increaseScore = function(score){
 	this.game.global.score += score;
 	this.scoreLabel.text = 'score: ' + this.game.global.score;
-	if(this.game.global.score >= 80){
+	if(this.game.global.score >= 100){
 		this.startLevel3();
 	}
 }
