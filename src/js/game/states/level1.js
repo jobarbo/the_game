@@ -25,7 +25,7 @@ level1.create = function () {
   this.player.anchor.setTo(0.5, 0.5);
   this.player.scale.setTo(0.5,0.5);
   this.game.physics.arcade.enable(this.player);
-  this.player.body.drag.set(1000);
+  this.player.body.drag.set(800);
   this.player.body.maxVelocity.set(500);
   this.player.invincible = false;
   this.player.body.collideWorldBounds = true;
@@ -78,7 +78,19 @@ level1.create = function () {
   this.laserSound = this.game.add.audio('laser');
 
   // Lasers
-  this.lasers = this.game.add.group();
+
+  this.weapon = this.game.add.weapon(10, 'laser');
+	this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+	this.weapon.bulletSpeed = 400;
+	this.weapon.fireRate = 150;
+	this.game.physics.arcade.enable(this.weapon);
+	this.weapon.trackSprite(this.player, 0, 0, true);
+	this.weapon.bullets.forEach((b) => {
+	    b.scale.setTo(0.5, 0.5);
+	    b.body.updateBounds();
+	}, this);
+
+  /*this.lasers = this.game.add.group();
   this.lasers.createMultiple(20, 'laser');
   for (i = 0; i <this.lasers.length ; i++) {
 	  	this.lasers.children[i].scale.setTo(0.5,0.5);
@@ -87,7 +99,7 @@ level1.create = function () {
   this.lasers.setAll('checkWorldBounds', true);
   this.lasers.setAll('outOfBoundsKill', true);
   this.game.physics.arcade.enable(this.lasers);
-  this.lasers.enableBody = true;
+  this.lasers.enableBody = true;*/
 
   // Keys
 	this.spacebar = this.game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
@@ -107,9 +119,9 @@ level1.update = function () {
 		null, this);
 	this.game.physics.arcade.overlap(this.player, this.meteors, this.playerDie,
 		null, this);
-	this.game.physics.arcade.overlap(this.lasers, this.meteors, this.touchMeteor,
+	this.game.physics.arcade.overlap(this.weapon, this.meteors, this.touchMeteor,
 		null, this);
-	this.game.physics.arcade.overlap(this.lasers, this.enemies, this.enemyDie,
+	this.game.physics.arcade.overlap(this.weapon, this.enemies, this.enemyDie,
 		null, this);
 	if(this.star!=null){
 		this.game.physics.arcade.overlap(this.player, this.star, this.takeStar,
@@ -141,37 +153,47 @@ level1.update = function () {
 	// Player movement
   if ( (cursors.up.isDown || this.wasd.up.isDown))
   {
-		this.player.body.acceleration.y = -500;
-		this.player.angle = 0;
+  	this.game.physics.arcade.accelerationFromRotation(this.player.rotation, 300, this.player.body.acceleration);
+		//this.player.body.acceleration.y = -500;
+		//this.player.angle = 0;
   }
-  else if ( (cursors.down.isDown || this.wasd.down.isDown))
-  {
-    this.player.body.acceleration.y = 500;
-		this.player.angle = 0;
+  else{
+  	this.player.body.acceleration.set(0);
   }
-  else if (cursors.left.isDown || this.wasd.left.isDown)
+
+  if ( (cursors.down.isDown || this.wasd.down.isDown))
   {
-    this.player.body.acceleration.x = -500;
-    this.player.body.acceleration.y = 0;
-    this.player.angle = -10;
+    //this.player.body.acceleration.y = 500;
+		//this.player.angle = 0;
+  }
+
+  if (cursors.left.isDown || this.wasd.left.isDown)
+  {
+  	this.player.body.angularVelocity = -300;
+    //this.player.body.acceleration.x = -500;
+    //this.player.body.acceleration.y = 0;
+    //this.player.angle = -10;
   }
   else if (cursors.right.isDown || this.wasd.right.isDown)
   {
-    this.player.body.acceleration.x = 500;
-    this.player.body.acceleration.y = 0;
-    this.player.angle = 10;
+  	this.player.body.angularVelocity = 300;
+    //this.player.body.acceleration.x = 500;
+    //this.player.body.acceleration.y = 0;
+    //this.player.angle = 10;
   }
   else
   {
-		this.player.body.acceleration.x = 0;
-		this.player.body.acceleration.y = 0;
-		this.player.angle = 0;
+  	this.player.body.angularVelocity = 0;
+		//this.player.body.acceleration.x = 0;
+		//this.player.body.acceleration.y = 0;
+		//this.player.angle = 0;
 	}
 
 	// Fire laser event
 	if(this.player.alive){
-		if (this.spacebar.justDown) {
-			this.fireLaser();
+		if (this.spacebar.isDown) {
+			//this.fireLaser();
+			this.weapon.fire();
 		}
 	}
 
