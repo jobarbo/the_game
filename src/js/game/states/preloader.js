@@ -7,9 +7,11 @@ preloader.preload = function () {
   this.game.load.image('player', 'images/player/playerShip2_green.png');
   this.game.load.image('life', 'images/player/life_green.png');
   this.game.load.image('laser', 'images/laserr.png');
+  this.game.load.image('laser_green', 'images/laserg.png');
   this.game.load.image('coin', 'images/collectables/coin/gold_1.png');
   this.game.load.image('star', 'images/collectables/star_silver.png');
   this.game.load.image('enemy', 'images/ennemies/enemyRed2.png');
+  this.game.load.image('boss', 'images/ennemies/enemyBlack1.png');
   this.game.load.image('pixel', 'images/pixel.png');
   this.game.load.image('shield', 'images/shield.png');
   this.game.load.image('multiammo', 'images/collectables/star_gold.png');

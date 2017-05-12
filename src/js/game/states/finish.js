@@ -1,6 +1,6 @@
-var mainTitle = {};
+var finish = {};
 
-mainTitle.create = function () {
+finish.create = function () {
 	
   this.game.physics.startSystem(Phaser.Physics.P2JS);
 
@@ -14,13 +14,9 @@ mainTitle.create = function () {
   this.button = this.game.add.button(this.game.world.centerX - 120, this.game.world.centerY + 120, 'button', this.startLevel1,
 		this);
 
-  this.startLabel = this.game.add.text(this.game.world.centerX - 40, this.game.world.centerY + 127, 'Jouer',
+  this.startLabel = this.game.add.text(this.game.world.centerX - 80, this.game.world.centerY + 127, 'Recommencer',
 		{ font: '22px Arial', fill: '#000000' });
 
-  // add Spacebar key
-  this.keys = [Phaser.KeyCode.SPACEBAR];
-  this.phaserKeys = this.game.input.keyboard.addKeys(this.keys);
-  this.game.input.keyboard.addKeyCapture(this.keys);
 
   // Best score
   if (!localStorage.getItem('bestScore')) {
@@ -39,18 +35,8 @@ mainTitle.create = function () {
 
 },
 
-mainTitle.update = function () {
-  // Fire laser event
-  for (var index in this.phaserKeys) {
-	var key = this.phaserKeys[index];
-	if (key.justDown) {
-		this.startLevel1();
-	}
-  }
-},
-
-mainTitle.startLevel1 = function () {
+finish.startLevel1 = function () {
 	this.game.state.start('level1');
 }
 
-module.exports = mainTitle;
+module.exports = finish;
