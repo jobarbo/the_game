@@ -89,6 +89,7 @@ level1.create = function () {
 	    b.scale.setTo(0.5, 0.5);
 	    b.body.updateBounds();
 	}, this);
+	this.weapon.bulletAngleOffset = 90;
 
   /*this.lasers = this.game.add.group();
   this.lasers.createMultiple(20, 'laser');
@@ -153,41 +154,41 @@ level1.update = function () {
 	// Player movement
   if ( (cursors.up.isDown || this.wasd.up.isDown))
   {
-  	this.game.physics.arcade.accelerationFromRotation(this.player.rotation, 300, this.player.body.acceleration);
-		//this.player.body.acceleration.y = -500;
-		//this.player.angle = 0;
+  	//this.game.physics.arcade.accelerationFromRotation(this.player.rotation, 300, this.player.body.acceleration);
+		this.player.body.acceleration.y = -500;
+		this.player.angle = 0;
   }
-  else{
-  	this.player.body.acceleration.set(0);
+ /* else{
+  	//this.player.body.acceleration.set(0);
+  }*/
+
+  else if ( (cursors.down.isDown || this.wasd.down.isDown))
+  {
+  	this.player.body.acceleration.y = 500;
+	this.player.angle = 0;
   }
 
-  if ( (cursors.down.isDown || this.wasd.down.isDown))
+  else if (cursors.left.isDown || this.wasd.left.isDown)
   {
-    //this.player.body.acceleration.y = 500;
-		//this.player.angle = 0;
-  }
-
-  if (cursors.left.isDown || this.wasd.left.isDown)
-  {
-  	this.player.body.angularVelocity = -300;
-    //this.player.body.acceleration.x = -500;
-    //this.player.body.acceleration.y = 0;
-    //this.player.angle = -10;
+  	//this.player.body.angularVelocity = -300;
+    this.player.body.acceleration.x = -500;
+    this.player.body.acceleration.y = 0;
+    this.player.angle = -10;
   }
   else if (cursors.right.isDown || this.wasd.right.isDown)
   {
-  	this.player.body.angularVelocity = 300;
-    //this.player.body.acceleration.x = 500;
-    //this.player.body.acceleration.y = 0;
-    //this.player.angle = 10;
+  	//this.player.body.angularVelocity = 300;
+    this.player.body.acceleration.x = 500;
+    this.player.body.acceleration.y = 0;
+    this.player.angle = 10;
   }
   else
   {
-  	this.player.body.angularVelocity = 0;
-		//this.player.body.acceleration.x = 0;
-		//this.player.body.acceleration.y = 0;
-		//this.player.angle = 0;
-	}
+  	//this.player.body.angularVelocity = 0;
+	this.player.body.acceleration.x = 0;
+	this.player.body.acceleration.y = 0;
+	this.player.angle = 0;
+  }
 
 	// Fire laser event
 	if(this.player.alive){
@@ -232,7 +233,6 @@ level1.fireLaser = function () {
 	if(this.playerBonus == 'multiammo'){
 		var laser2 = this.lasers.getFirstExists(false);
 		if (laser2) {
-			this.laserSound.play();
 			laser2.reset(this.player.x - 20, this.player.y - 20);
 			laser2.body.velocity.y = -500;
 			laser2.angle = -30;
@@ -240,7 +240,6 @@ level1.fireLaser = function () {
 		}
 		var laser3 = this.lasers.getFirstExists(false);
 		if (laser3) {
-			this.laserSound.play();
 			laser3.reset(this.player.x + 20, this.player.y - 20);
 			laser3.body.velocity.y = -500;
 			laser3.angle = +30;
@@ -249,14 +248,14 @@ level1.fireLaser = function () {
 	}
 	var laser = this.lasers.getFirstExists(false);
 	if (laser) {
-		this.laserSound.play();
+		//this.laserSound.play();
 		laser.reset(this.player.x, this.player.y - 20);
 		laser.body.velocity.y = -500;
 		laser.angle = 0;
 	}
 },
 level1.takeStar = function(player, star) {
-	this.coinSound.play();
+	//this.coinSound.play();
 	star.kill();
 
 	this.playerBonus = 'shield';
@@ -272,7 +271,7 @@ level1.takeStar = function(player, star) {
 },
 level1.takeMultiAmmo = function(player, bonus) {
 
-	this.coinSound.play();
+	//this.coinSound.play();
 	bonus.kill();
 	this.playerBonus = 'multiammo';
 
