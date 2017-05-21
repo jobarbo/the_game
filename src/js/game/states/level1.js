@@ -8,6 +8,7 @@ level1.create = function () {
   this.bonusDropped = false;
   this.bonusTimerSize = 1;
   this.shield = null;
+  this.nextShotPowerUpAt = 0;
 
   // Background
   this.background = this.game.add.tileSprite(this.game.world.centerX - 10, this.game.world.centerY, 800, 600, 'background');
@@ -82,9 +83,10 @@ level1.create = function () {
   this.weapon = this.game.add.weapon(10, 'laser');
 	this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
 	this.weapon.bulletSpeed = 400;
-	this.weapon.fireRate = 150;
+	this.weapon.fireRate = 200;
+	this.weapon.fireAngle = 270;
 	this.game.physics.arcade.enable(this.weapon);
-	this.weapon.trackSprite(this.player, 0, 0, true);
+	this.weapon.trackSprite(this.player, 0, 0, false);
 	this.weapon.bullets.forEach((b) => {
 	    b.scale.setTo(0.5, 0.5);
 	    b.body.updateBounds();
@@ -120,9 +122,9 @@ level1.update = function () {
 		null, this);
 	this.game.physics.arcade.overlap(this.player, this.meteors, this.playerDie,
 		null, this);
-	this.game.physics.arcade.overlap(this.weapon, this.meteors, this.touchMeteor,
+	this.game.physics.arcade.overlap(this.weapon.bullets, this.meteors, this.touchMeteor,
 		null, this);
-	this.game.physics.arcade.overlap(this.weapon, this.enemies, this.enemyDie,
+	this.game.physics.arcade.overlap(this.weapon.bullets, this.enemies, this.enemyDie,
 		null, this);
 	if(this.star!=null){
 		this.game.physics.arcade.overlap(this.player, this.star, this.takeStar,
@@ -156,7 +158,7 @@ level1.update = function () {
   {
   	//this.game.physics.arcade.accelerationFromRotation(this.player.rotation, 300, this.player.body.acceleration);
 		this.player.body.acceleration.y = -500;
-		this.player.angle = 0;
+		//this.player.angle = 0;
   }
  /* else{
   	//this.player.body.acceleration.set(0);
@@ -165,7 +167,7 @@ level1.update = function () {
   else if ( (cursors.down.isDown || this.wasd.down.isDown))
   {
   	this.player.body.acceleration.y = 500;
-	this.player.angle = 0;
+	//this.player.angle = 0;
   }
 
   else if (cursors.left.isDown || this.wasd.left.isDown)
@@ -173,28 +175,47 @@ level1.update = function () {
   	//this.player.body.angularVelocity = -300;
     this.player.body.acceleration.x = -500;
     this.player.body.acceleration.y = 0;
-    this.player.angle = -10;
+    //this.player.angle = -10;
   }
   else if (cursors.right.isDown || this.wasd.right.isDown)
   {
   	//this.player.body.angularVelocity = 300;
     this.player.body.acceleration.x = 500;
     this.player.body.acceleration.y = 0;
-    this.player.angle = 10;
+    //this.player.angle = 10;
   }
   else
   {
   	//this.player.body.angularVelocity = 0;
 	this.player.body.acceleration.x = 0;
 	this.player.body.acceleration.y = 0;
-	this.player.angle = 0;
+	//this.player.angle = 0;
   }
 
 	// Fire laser event
 	if(this.player.alive){
 		if (this.spacebar.isDown) {
-			//this.fireLaser();
-			this.weapon.fire();
+			if(this.playerBonus != 'multiammo'){
+				this.weapon.fireRate = 200;
+				this.weapon.fireRate = 270;
+				this.weapon.fire();
+			} else {
+				this.weapon.fireRate = 0;
+				if (this.nextShotPowerUpAt > this.time.now) return;
+
+				this.nextShotPowerUpAt = this.time.now + 200;
+				for ( var i = 0; i < 3; i++ ) {
+
+					var left = new Phaser.Point(this.player.position.x - (10+i*6), this.player.position.y - 20);
+					this.weapon.fireAngle = -95 - i*10;
+					this.weapon.fire(left);
+								
+					var right = new Phaser.Point(this.player.position.x + (10+i*6), this.player.position.y - 20);
+					this.weapon.fireAngle = -85 + i*10;
+					this.weapon.fire(right);
+				}
+			}
+			//this.weapon.fireAtSprite(this.enemies.children[0]); tête chercheuse
 		}
 	}
 
