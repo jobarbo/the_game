@@ -9,6 +9,11 @@ level1.create = function () {
   this.bonusTimerSize = 1;
   this.shield = null;
   this.nextShotPowerUpAt = 0;
+  this.practiceMode = false;
+  this.pointToNextLevel = 100;
+  this.currentLevel = 1;
+  this.enemyLife = 10;
+  this.game.time.slowMotion = 1.0;
 
   // Background
   this.background = this.game.add.tileSprite(this.game.world.centerX - 10, this.game.world.centerY, 800, 600, 'background');
@@ -16,13 +21,21 @@ level1.create = function () {
   this.background.scale.setTo(3.4, 3.4);
 
   // Labels
-  this.scoreLabel = this.game.add.text(50, 50, 'score: 0',
+  this.scoreLabel = this.game.add.text(50, 20, 'Score: 0',
 		{ font: '22px Arial', fill: '#ffffff' });
-  this.levelLabel = this.game.add.text(50, 20, 'Level 1',
+  this.levelLabel = this.game.add.text(this.game.world.centerX, 20, 'Level ' + this.currentLevel,
   		{ font: '22px Arial', fill: '#ffffff' });
+  this.bonusLabel = this.game.add.text(50, 50, 'Bonus Time: ',
+  		{ font: '22px Arial', fill: '#ffffff' });
+  this.bonusLabel.visible = false;
+
+    this.finishLabel = this.game.add.text(this.game.world.centerX, this.game.world.centerY, 'YOU WIN',
+  		{ font: '40px Arial', fill: '#ffffff' });
+    this.finishLabel.anchor.setTo(0.5,0.5);
+    this.finishLabel.alpha = 0;
 
   // Add player
-  this.player = this.game.add.sprite(this.game.width/2, this.game.world.centerY + 100, 'player');
+  this.player = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY + 100, 'player');
   this.player.anchor.setTo(0.5, 0.5);
   this.player.scale.setTo(0.5,0.5);
   this.game.physics.arcade.enable(this.player);
@@ -37,9 +50,16 @@ level1.create = function () {
   bmd.ctx.rect(0, 0, 100, 8);
   bmd.ctx.fillStyle = '#ffffff';
   bmd.ctx.fill();
-  this.bonusTimer = this.game.add.sprite(0, 0, bmd);
+  this.bonusTimer = this.game.add.sprite(230, 63, bmd);
   this.bonusTimer.anchor.setTo(0.5, 0.5);
   this.bonusTimer.visible = false;
+
+  // Add Friend
+  this.friend = this.game.add.sprite(-100, this.game.world.centerY + 100, 'friend');
+  this.friend.anchor.setTo(0.5, 0.5);
+  this.friend.scale.setTo(0.3,0.3);
+  this.game.physics.arcade.enable(this.friend);
+  this.friend.follow = false;
 
   // Life
   this.life = this.game.add.sprite(this.game.width - 150, 40, 'life');
@@ -80,18 +100,32 @@ level1.create = function () {
 
   // Lasers
 
-  this.weapon = this.game.add.weapon(10, 'laser');
-	this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-	this.weapon.bulletSpeed = 400;
-	this.weapon.fireRate = 200;
-	this.weapon.fireAngle = 270;
-	this.game.physics.arcade.enable(this.weapon);
-	this.weapon.trackSprite(this.player, 0, 0, false);
-	this.weapon.bullets.forEach((b) => {
-	    b.scale.setTo(0.5, 0.5);
-	    b.body.updateBounds();
-	}, this);
-	this.weapon.bulletAngleOffset = 90;
+  this.weapon = this.game.add.weapon(30, 'laser_green');
+  this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+  this.weapon.bulletSpeed = 400;
+  this.weapon.fireRate = 200;
+  this.weapon.fireAngle = 270;
+  this.game.physics.arcade.enable(this.weapon);
+  this.weapon.trackSprite(this.player, 0, 0, false);
+  this.weapon.bullets.forEach((b) => {
+  	b.scale.setTo(0.5, 0.5);
+	b.body.updateBounds();
+  }, this);
+  this.weapon.bulletAngleOffset = 90;
+
+  this.weaponFriend = this.game.add.weapon(10, 'laser');
+  this.weaponFriend.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+  this.weaponFriend.bulletSpeed = 400;
+  this.weaponFriend.fireRate = 200;
+  this.weaponFriend.fireAngle = 270;
+  this.weaponFriend.bulletAngleVariance  = 15;
+  this.game.physics.arcade.enable(this.weaponFriend);
+  this.weaponFriend.trackSprite(this.friend, 0, 0, false);
+  this.weaponFriend.bullets.forEach((b) => {
+  	b.scale.setTo(0.5, 0.5);
+  	b.body.updateBounds();
+  }, this);
+  this.weaponFriend.bulletAngleOffset = 90;
 
   /*this.lasers = this.game.add.group();
   this.lasers.createMultiple(20, 'laser');
@@ -126,32 +160,55 @@ level1.update = function () {
 		null, this);
 	this.game.physics.arcade.overlap(this.weapon.bullets, this.enemies, this.enemyDie,
 		null, this);
+
+	// Bonus collectables
 	if(this.star!=null){
-		this.game.physics.arcade.overlap(this.player, this.star, this.takeStar,
+		this.game.physics.arcade.overlap(this.player, this.star, this.takeBonus,
 		null, this);
 	}
 	if(this.multiammo!=null){
-		this.game.physics.arcade.overlap(this.player, this.multiammo, this.takeMultiAmmo,
+		this.game.physics.arcade.overlap(this.player, this.multiammo, this.takeBonus,
+		null, this);
+	}
+	if(this.homingMissile!=null){
+		this.game.physics.arcade.overlap(this.player, this.homingMissile, this.takeBonus,
+		null, this);
+	}
+	if(this.friendBonus!=null){
+		this.game.physics.arcade.overlap(this.player, this.friendBonus, this.takeBonus,
 		null, this);
 	}
 
-	// Meteors spawn
-	if (this.nextMeteor < this.game.time.now) {
-		var start = 3000, end = 1500, score = 100;
-		var delay = Math.max(
-		start - (start - end) * this.game.global.score / score, end);
-		this.addMeteor();
-		this.nextMeteor = this.game.time.now + delay;
+	if(this.friend.follow){
+		this.game.physics.arcade.overlap(this.weaponFriend.bullets, this.enemies, this.enemyDie,
+		null, this);
+		this.game.physics.arcade.moveToXY(this.friend, this.player.x - 60, this.player.y + 10, 100, 500);
+		this.weaponFriend.fire();
+	}
+	else{
+		this.game.physics.arcade.moveToXY(this.friend, -100, this.game.world.centerY, 100, 500);
 	}
 
-	// Ennemies spawn
-	if (this.nextEnemy < this.game.time.now) {
-		var start = 2500, end = 1500, score = 100;
-		var delay = Math.max(
-		start - (start - end) * this.game.global.score / score, end);
-		this.addEnemy();
-		this.nextEnemy = this.game.time.now + delay;
+	if(!this.practiceMode){
+		// Meteors spawn
+		if (this.nextMeteor < this.game.time.now) {
+			var start = 3000, end = 1500, score = 100;
+			var delay = Math.max(
+			start - (start - end) * this.game.global.score / score, end);
+			this.addMeteor();
+			this.nextMeteor = this.game.time.now + delay;
+		}
+
+		// Ennemies spawn
+		if (this.nextEnemy < this.game.time.now) {
+			var start = 2500, end = 1500, score = 100;
+			var delay = Math.max(
+			start - (start - end) * this.game.global.score / score, end);
+			this.addEnemy();
+			this.nextEnemy = this.game.time.now + delay;
+		}	
 	}
+	
 
 	// Player movement
   if ( (cursors.up.isDown || this.wasd.up.isDown))
@@ -195,16 +252,21 @@ level1.update = function () {
 	// Fire laser event
 	if(this.player.alive){
 		if (this.spacebar.isDown) {
-			if(this.playerBonus != 'multiammo'){
+			if(this.playerBonus == 'missile'){
 				this.weapon.fireRate = 200;
-				this.weapon.fireRate = 270;
-				this.weapon.fire();
-			} else {
+				if(this.enemies.getFirstAlive() != null){
+					this.weapon.fireAtSprite(this.enemies.getFirstAlive());
+				}
+				else{
+					this.weapon.fire();
+				}
+			} 
+			else if(this.playerBonus == 'multiammo'){
 				this.weapon.fireRate = 0;
 				if (this.nextShotPowerUpAt > this.time.now) return;
 
 				this.nextShotPowerUpAt = this.time.now + 200;
-				for ( var i = 0; i < 3; i++ ) {
+				for ( var i = 0; i < 2; i++ ) {
 
 					var left = new Phaser.Point(this.player.position.x - (10+i*6), this.player.position.y - 20);
 					this.weapon.fireAngle = -95 - i*10;
@@ -215,14 +277,16 @@ level1.update = function () {
 					this.weapon.fire(right);
 				}
 			}
-			//this.weapon.fireAtSprite(this.enemies.children[0]); tête chercheuse
+			else{
+				this.weapon.fireRate = 200;
+				this.weapon.fireAngle = 270;
+				this.weapon.fire();
+			}
 		}
 	}
 
 	// Bonus timer
 	if(this.bonusTimer.visible){
-		this.bonusTimer.x = this.player.x;
-		this.bonusTimer.y = this.player.y - 30;
 		if(this.bonusTimerSize > 0){
 			this.bonusTimerSize -= 0.00165;
 			this.bonusTimer.scale.setTo(this.bonusTimerSize,1);	
@@ -275,31 +339,22 @@ level1.fireLaser = function () {
 		laser.angle = 0;
 	}
 },
-level1.takeStar = function(player, star) {
+level1.takeBonus = function(player, bonus) {
 	//this.coinSound.play();
-	star.kill();
+	this.playerBonus = bonus.key;
+	if(bonus.key == 'star'){
+		this.shield = this.game.add.sprite(this.player.x + 30, this.player.y - 30, 'shield');
+		this.game.physics.arcade.enable(this.shield);
+		this.shield.anchor.setTo(0.5, 0.5);
+	}
 
-	this.playerBonus = 'shield';
-	this.shield = this.game.add.sprite(this.player.x + 30, this.player.y - 30, 'shield');
-	this.game.physics.arcade.enable(this.shield);
-	this.shield.anchor.setTo(0.5, 0.5);
+	if(bonus.key == 'friend_bonus'){
+		this.friend.follow = true;
+	}
 
-	this.bonusTimer.x = this.player.x;
-	this.bonusTimer.y = this.player.y - 30;
 	this.bonusTimer.visible = true;
-
-	this.game.time.events.add(10000, this.stopBonus, this);
-},
-level1.takeMultiAmmo = function(player, bonus) {
-
-	//this.coinSound.play();
+	this.bonusLabel.visible = true;
 	bonus.kill();
-	this.playerBonus = 'multiammo';
-
-	this.bonusTimer.x = this.player.x;
-	this.bonusTimer.y = this.player.y - 30;
-	this.bonusTimer.visible = true;
-
 	this.game.time.events.add(10000, this.stopBonus, this);
 },
 level1.addEnemy = function() {
@@ -308,7 +363,7 @@ level1.addEnemy = function() {
 		return;
 	}
 	enemy.anchor.setTo(0.5, 1);
-	enemy.healthPoint = 10;
+	enemy.healthPoint = this.enemyLife;
 	enemy.reset(this.game.rnd.pick([100, 200, 300, 400, 500, 600, 700]), 0);
 
 	enemy.rotation = this.game.physics.arcade.angleBetween(enemy, this.player) - 1.5;
@@ -337,7 +392,10 @@ level1.playerDie = function() {
 		        break;
 		    case 0:
 		    	this.life.kill();
-		        this.game.time.events.add(1000, this.startMenu, this);
+		    	this.finishLabel.text = 'YOU LOSE';
+		    	this.game.add.tween(this.finishLabel).to( { alpha: 1 }, 2500, "Linear", true);
+		    	this.game.time.slowMotion = 2.0;
+		        this.game.time.events.add(3000, this.startMenu, this);
 		        break;
 		}
 		this.stopBonus();
@@ -361,24 +419,35 @@ level1.enemyDie = function(sprite, enemy) {
 
 		number = this.game.rnd.pick([1, 2, 3 , 4, 5]);
 		if(this.playerBonus == '' && this.bonusDropped == false){
+			this.bonusDropped = true;
 			switch(number){
 				case 5 :
-					this.bonusDropped = true;
 					this.star = this.game.add.sprite(enemyX, enemyY, 'star');
 					this.star.anchor.setTo(0.5, 0.5);
 					this.star.scale.setTo(0.8, 0.8);
 					this.game.physics.arcade.enable(this.star);
 					break;
 				case 4 :
-					this.bonusDropped = true;
 					this.multiammo = this.game.add.sprite(enemyX, enemyY, 'multiammo');
 					this.multiammo.anchor.setTo(0.5, 0.5);
 					this.multiammo.scale.setTo(0.8, 0.8);
 					this.game.physics.arcade.enable(this.multiammo);
 					break;
-				default: 
-					// À voir
-					break;    
+				case 3 :
+					this.friendBonus = this.game.add.sprite(enemyX, enemyY, 'friend_bonus');
+					this.friendBonus.anchor.setTo(0.5, 0.5);
+					this.friendBonus.scale.setTo(0.8, 0.8);
+					this.game.physics.arcade.enable(this.friendBonus);
+					break;
+				case 2 :
+					this.homingMissile = this.game.add.sprite(enemyX, enemyY, 'missile');
+					this.homingMissile.anchor.setTo(0.5, 0.5);
+					this.homingMissile.scale.setTo(0.8, 0.8);
+					this.game.physics.arcade.enable(this.homingMissile);
+					break;
+				case 1 :
+					//
+					break;   
 			}
 		}
 
@@ -429,7 +498,13 @@ level1.stopBonus = function() {
 	if(this.shield != null){
 		this.shield.kill();
 	}
+
+	if(this.friend.follow){
+		this.friend.follow = false;
+	}
+
 	this.bonusTimer.visible = false;
+	this.bonusLabel.visible = false;
 	this.bonusTimer.scale.setTo(1,1);
 	this.bonusTimerSize = 1;
 	this.playerBonus = '';
@@ -443,9 +518,11 @@ level1.toggleInvincible = function() {
 },
 level1.increaseScore = function(score){
 	this.game.global.score += score;
-	this.scoreLabel.text = 'score: ' + this.game.global.score;
-	if(this.game.global.score >= 100){
-		this.startLevel2();
+	this.scoreLabel.text = 'Score: ' + this.game.global.score;
+	if(this.game.global.score >= this.pointToNextLevel){
+		this.game.add.tween(this.finishLabel).to( { alpha: 1 }, 2500, "Linear", true);
+		this.game.time.slowMotion = 2.0;
+		this.game.time.events.add(3000, this.startLevel2, this);
 	}
 }
 
