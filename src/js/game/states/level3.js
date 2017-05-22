@@ -13,10 +13,12 @@ level3.create = function () {
   this.currentLevel = 3;
   this.enemyLife = 20;
   this.bossLife = 500;
+  this.maxBossLife = 500;
   this.game.time.slowMotion = 1.0;
   this.delayMeteor = 3000;
   this.delayEnemy = 4000;
   this.finish = false;
+  this.bossDirection = 'left';
 
   // Background
   this.background = this.game.add.tileSprite(this.game.world.centerX - 10, this.game.world.centerY, 800, 600, 'background');
@@ -47,6 +49,14 @@ level3.create = function () {
   this.player.invincible = false;
   this.player.body.collideWorldBounds = true;
 
+  // Add Boss
+  this.boss = this.game.add.sprite(this.game.width/2, -50, 'boss');
+  this.boss.anchor.setTo(0.5, 0.5);
+  this.boss.scale.setTo(2,2);
+  this.game.physics.arcade.enable(this.boss);
+  this.boss.body.velocity.y = 50;
+  this.boss.healthPoint = this.bossLife;
+
   // Bonus timer
   var bmd = this.game.add.bitmapData(100, 8);
   bmd.ctx.beginPath();
@@ -57,6 +67,15 @@ level3.create = function () {
   this.bonusTimer.anchor.setTo(0.5, 0.5);
   this.bonusTimer.visible = false;
 
+  // Boss lifebar
+  var bmdBoss = this.game.add.bitmapData(200, 8);
+  bmdBoss.ctx.beginPath();
+  bmdBoss.ctx.rect(0, 0, 200, 8);
+  bmdBoss.ctx.fillStyle = '#c0392b';
+  bmdBoss.ctx.fill();
+  this.bossLifeBar = this.game.add.sprite(this.boss.x, this.boss.y, bmdBoss);
+  this.bossLifeBar.anchor.setTo(0.5, 0.5);
+
   // Add Friend
   this.friend = this.game.add.sprite(-100, this.game.world.centerY + 100, 'friend');
   this.friend.anchor.setTo(0.5, 0.5);
@@ -64,18 +83,29 @@ level3.create = function () {
   this.game.physics.arcade.enable(this.friend);
   this.friend.follow = false;
 
-  // Add Boss
-  this.boss = this.game.add.sprite(this.game.width/2, -50, 'boss');
-  this.boss.anchor.setTo(0.5, 0.5);
-  this.boss.scale.setTo(2,2);
-  this.game.physics.arcade.enable(this.boss);
-  this.boss.body.velocity.y = 50;
-  this.boss.healthPoint = this.bossLife;
-
   // Life
   this.life = this.game.add.sprite(this.game.width - 150, 40, 'life');
   this.life2 = this.game.add.sprite(this.game.width - 110, 40, 'life');
   this.life3 = this.game.add.sprite(this.game.width - 70, 40, 'life');
+
+  //  An explosion pool
+  explosions = this.game.add.group();
+  explosions.enableBody = true;
+  explosions.physicsBodyType = Phaser.Physics.ARCADE;
+  explosions.createMultiple(30, 'explosion');
+  explosions.setAll('anchor.x', 0.5);
+  explosions.setAll('anchor.y', 0.5);
+  explosions.forEach( function(explosion) {
+      explosion.animations.add('explosion');
+  });
+
+  //  Big explosion for boss
+  this.bossDeath = this.game.add.emitter(this.boss.x, this.boss.y);
+  this.bossDeath.width = this.boss.width / 2;
+  this.bossDeath.height = this.boss.height / 2;
+  this.bossDeath.makeParticles('explosion', [0,1,2,3,4,5,6,7], 20);
+  this.bossDeath.setAlpha(0.9, 0, 900);
+  this.bossDeath.setScale(0.3, 1.0, 0.3, 1.0, 1000, Phaser.Easing.Quintic.Out);
 
   // Emitter
   this.emitter = this.game.add.emitter(0, 0, 15);
@@ -138,19 +168,19 @@ level3.create = function () {
   }, this);
   this.weaponFriend.bulletAngleOffset = 90;
 
-    // Create group laser
-    this.lasersBoss = this.game.add.group();
-    this.lasersBoss.createMultiple(3, 'laser_green');
-    //set the scale for each group children instead of the whole group
-    for (i = 0; i <this.lasersBoss.length ; i++) {
-  	  	this.lasersBoss.children[i].scale.setTo(0.5,0.5);
-  	  	this.lasersBoss.children[i].anchor.setTo(0.5,0.5);
-  	  	this.lasersBoss.children[i].checkWorldBounds = true;
-  	  	this.lasersBoss.children[i].outOfBoundsKill = true;
-    }
-    this.lasersBoss.enableBody = true;
-    this.game.physics.arcade.enable(this.lasersBoss);
-
+  this.weaponBoss = this.game.add.weapon(10, 'laser');
+  this.weaponBoss.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+  this.weaponBoss.bulletSpeed = 400;
+  this.weaponBoss.fireRate = 800;
+  this.weaponBoss.fireAngle = 90;
+  this.weaponBoss.bulletAngleVariance  = 40;
+  this.game.physics.arcade.enable(this.weaponBoss);
+  this.weaponBoss.trackSprite(this.boss, 0, 0, false);
+  this.weaponBoss.bullets.forEach((b) => {
+  	b.scale.setTo(0.5, 0.5);
+  	b.body.updateBounds();
+  }, this);
+  this.weaponBoss.bulletAngleOffset = 90;
 
   // Keys
 	this.spacebar = this.game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
@@ -182,9 +212,9 @@ level3.update = function () {
 			this.game.physics.arcade.overlap(this.player, this.boss, this.playerDie,
 				null, this);
 		}
-		this.game.physics.arcade.overlap(this.lasersBoss, this.meteors, this.touchMeteor,
+		this.game.physics.arcade.overlap(this.weaponBoss.bullets, this.meteors, this.touchMeteor,
 			null, this);
-		this.game.physics.arcade.overlap(this.player, this.lasersBoss, this.playerDie,
+		this.game.physics.arcade.overlap(this.player, this.weaponBoss.bullets, this.playerDie,
 			null, this);
 		this.game.physics.arcade.overlap(this.weapon.bullets, this.boss, this.damageBoss,
 			null, this);
@@ -211,6 +241,10 @@ level3.update = function () {
 		if(this.friend.follow){
 			this.game.physics.arcade.overlap(this.weaponFriend.bullets, this.enemies, this.enemyDie,
 			null, this);
+
+			this.game.physics.arcade.overlap(this.weaponFriend.bullets, this.boss, this.damageBoss,
+			null, this);
+
 			this.game.physics.arcade.moveToXY(this.friend, this.player.x - 60, this.player.y + 10, 100, 500);
 			this.weaponFriend.fire();
 		}
@@ -239,18 +273,22 @@ level3.update = function () {
 	if(this.boss.y > 200){
 		this.boss.y = 200;
 
-		if(this.boss.x > 200 && this.boss.x < 600){
-			this.boss.x += 1;
+		if(this.bossDirection == 'left'){
+			this.boss.body.velocity.x = -60;
+			if(this.boss.x < 200){
+				this.bossDirection = 'right';
+			}
 		}
 		else{
-			if(this.boss.x >= 600){
-				this.boss.x -= 1;		
+			this.boss.body.velocity.x = 60;
+			if(this.boss.x > 700){
+				this.bossDirection = 'left';
 			}
 		}
 	}
 	
 	if(this.boss.alive){
-		this.fireLaserBoss();
+		this.weaponBoss.fire();
 	}
 
 	// Player movement
@@ -329,10 +367,14 @@ level3.update = function () {
 			null, this);
 		this.game.physics.arcade.overlap(this.shield, this.meteors, this.hitMeteor,
 			null, this);
-		this.game.physics.arcade.overlap(this.shield, this.lasersBoss, this.hitMeteor,
+		this.game.physics.arcade.overlap(this.shield, this.weaponBoss.bullets, this.hitMeteor,
 			null, this);
 		this.game.physics.arcade.moveToObject(this.shield, this.player, 50, 50);
 	}
+
+	this.bossLifeBar.x = this.boss.x;
+	this.bossLifeBar.y = this.boss.y - 100;
+
 }, // End update()
 
 level3.startMenu = function() {
@@ -340,17 +382,6 @@ level3.startMenu = function() {
 },
 level3.resetPlayer = function() {
 	this.player.reset(this.game.width/2, this.game.world.centerY + 100);
-},
-level3.fireLaserBoss = function () {
-	var laserBoss = this.lasersBoss.getFirstExists(false);
-	if (laserBoss) {
-		this.laserSound.play();
-		laserBoss.reset(this.boss.x, this.boss.y + 20);
-
-		angleLaser = this.game.rnd.pick([45, 75, 90, 105, 120, 140]);
-		laserBoss.angle = angleLaser - 80;
-		this.physics.arcade.velocityFromAngle(angleLaser, 300, laserBoss.body.velocity);
-	}
 },
 level3.takeBonus = function(player, bonus) {
 	this.playerBonus = bonus.key;
@@ -537,9 +568,35 @@ level3.damageBoss = function(boss, laser) {
 	laser.kill();
 
 	this.boss.healthPoint -= 10;
+	this.bossLifeBar.scale.setTo( (this.boss.healthPoint / this.maxBossLife ) , 1);	
+
 	if(this.boss.healthPoint <= 0){
-		boss.kill();
+		
 		this.finish = true;
+
+		this.bossDeath.x = boss.x;
+        this.bossDeath.y = boss.y;
+        this.bossDeath.start(false, 1000, 50, 20);
+
+		this.game.time.events.add(1000, function(){
+			var explosion = explosions.getFirstExists(false);
+			var beforeScaleX = explosions.scale.x;
+			var beforeScaleY = explosions.scale.y;
+			var beforeAlpha = explosions.alpha;
+			explosion.reset(boss.body.x + boss.body.halfWidth, boss.body.y + boss.body.halfHeight);
+			explosion.alpha = 0.4;
+			explosion.scale.x = 3;
+			explosion.scale.y = 3;
+			var animation = explosion.play('explosion', 30, false, true);
+			animation.onComplete.addOnce(function(){
+			    explosion.scale.x = beforeScaleX;
+			    explosion.scale.y = beforeScaleY;
+			    explosion.alpha = beforeAlpha;
+			});
+
+			boss.kill();
+		});
+
 		this.game.add.tween(this.finishLabel).to( { alpha: 1 }, 2500, "Linear", true);
 		this.game.time.slowMotion = 2.0;
 		this.game.time.events.add(3000, this.finishGame, this);

@@ -23,6 +23,8 @@ preloader.preload = function () {
   this.game.load.image('meteor_grey', 'images/meteor/meteor_grey_big.png');
   this.game.load.image('meteor_grey_med', 'images/meteor/meteor_grey_big.png');
 
+  this.game.load.spritesheet('explosion', 'images/explode.png', 128, 128);
+
   this.game.load.audio('coin', 'audio/powerup.mp3');
   this.game.load.audio('laser', 'audio/laser.mp3');
 };
