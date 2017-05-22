@@ -50,7 +50,7 @@ mainTitle.update = function () {
 },
 
 mainTitle.startLevel1 = function () {
-	this.game.state.start('level3');
+	this.game.state.start('level1');
 }
 
 module.exports = mainTitle;
