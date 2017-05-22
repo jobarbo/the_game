@@ -346,6 +346,10 @@ level1.playerDie = function() {
 		this.game.global.life -= 1;
 
 		switch(this.game.global.life) {
+			case 3:
+				this.life4.kill();
+			    this.game.time.events.add(1000, this.resetPlayer, this);
+			    break;
 		    case 2:
 		    	this.life3.kill();
 		        this.game.time.events.add(1000, this.resetPlayer, this);
@@ -495,7 +499,7 @@ level1.increaseScore = function(score){
 		this.finish = true;
 		this.game.add.tween(this.finishLabel).to( { alpha: 1 }, 2500, "Linear", true);
 		this.game.time.slowMotion = 2.0;
-		this.game.time.events.add(5000, this.startNextLevel, this);
+		this.game.time.events.add(4000, this.startNextLevel, this);
 	}
 },
 level1.removeTextPoint = function(text){
@@ -530,7 +534,7 @@ level1.dropBonus = function(spriteX, spriteY){
 		bonusSprite.scale.setTo(0.8, 0.8);
 	    this.bonuses.add(bonusSprite);
 
-		this.game.time.events.add(10000, this.resetBonus, this, bonusSprite);
+		this.game.time.events.add(8000, this.resetBonus, this, bonusSprite);
 	}
 },
 level1.resetBonus = function(sprite){
