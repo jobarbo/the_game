@@ -67,9 +67,14 @@ level1.create = function () {
   this.friend.follow = false;
 
   // Life
-  this.life = this.game.add.sprite(this.game.width - 150, 40, 'life');
-  this.life2 = this.game.add.sprite(this.game.width - 110, 40, 'life');
-  this.life3 = this.game.add.sprite(this.game.width - 70, 40, 'life');
+  this.lives = this.game.add.group();
+  this.lives.createMultiple(this.game.global.life, 'life');
+
+  for (i = 0; i < this.game.global.life ; i++) {
+  	this.lives.children[i].x = this.game.width - (180 - (i * 40));
+  	this.lives.children[i].y = 40;
+  	this.lives.children[i].visible = true;
+  }
 
   // Emitter
   this.emitter = this.game.add.emitter(0, 0, 100);
@@ -171,6 +176,8 @@ level1.update = function () {
 		if(this.friend.follow){
 			this.game.physics.arcade.overlap(this.weaponFriend.bullets, this.enemies, this.enemyDie,
 			null, this);
+			this.game.physics.arcade.overlap(this.weaponFriend.bullets, this.meteors, this.touchMeteor,
+				null, this);
 			this.game.physics.arcade.moveToXY(this.friend, this.player.x - 60, this.player.y + 10, 100, 500);
 			this.weaponFriend.fire();
 		}
@@ -303,8 +310,10 @@ level1.takeBonus = function(player, bonus) {
 	}
 
 	if(bonus.key == 'pill'){
-		this.life4 = this.game.add.sprite(this.game.width - 190, 40, 'life');
+		bonusHeart = this.game.add.sprite( (this.lives.children[this.lives.length - 1].x + 40 ), 40, 'life');
+		this.lives.add(bonusHeart);
 		this.game.global.life += 1;
+		this.stopBonus();
 	}
 	else{
 		this.bonusTimer.visible = true;
@@ -339,34 +348,26 @@ level1.playerDie = function() {
 		}, this);
 
 		this.emitter.x = this.player.x;
+		this.emitter.setScale(2, 0, 2, 0, 800);
 		this.emitter.y = this.player.y;
 		this.emitter.start(true, 800, null, 15);
 
 		this.player.kill();
 		this.game.global.life -= 1;
+		this.lives.remove(this.lives.children[this.game.global.life]);
 
-		switch(this.game.global.life) {
-			case 3:
-				this.life4.kill();
-			    this.game.time.events.add(1000, this.resetPlayer, this);
-			    break;
-		    case 2:
-		    	this.life3.kill();
-		        this.game.time.events.add(1000, this.resetPlayer, this);
-		        break;
-		    case 1:
-		    	this.life2.kill();
-		        this.game.time.events.add(1000, this.resetPlayer, this);
-		        break;
-		    case 0:
-		    	this.life.kill();
-		    	this.finishLabel.text = 'YOU LOSE';
-		    	this.finish = true;
-		    	this.game.add.tween(this.finishLabel).to( { alpha: 1 }, 2500, "Linear", true);
-		    	this.game.time.slowMotion = 2.0;
-		        this.game.time.events.add(3000, this.startMenu, this);
-		        break;
+		if(this.game.global.life > 0){
+			this.game.time.events.add(1000, this.resetPlayer, this);
 		}
+		else{
+			this.life.kill();
+			this.finishLabel.text = 'YOU LOSE';
+			this.finish = true;
+			this.game.add.tween(this.finishLabel).to( { alpha: 1 }, 2500, "Linear", true);
+			this.game.time.slowMotion = 2.0;
+		    this.game.time.events.add(3000, this.startMenu, this);
+		}
+
 		this.stopBonus();
 		this.player.alpha = 0.1;
 		this.toggleInvincible();
@@ -407,6 +408,7 @@ level1.enemyDie = function(sprite, enemy) {
 
 		this.emitter.x = enemy.x;
 		this.emitter.y = enemy.y;
+		this.emitter.setScale(2, 0, 2, 0, 800);
 		this.emitter.start(true, 800, null, 15);
 	}
 },
@@ -458,12 +460,12 @@ level1.touchMeteor = function(laser, meteor) {
 	}
 
 	this.emitter.x = meteor.x;
+	this.emitter.setScale(1, 0, 1, 0, 800);
 	this.emitter.y = meteor.y;
 	this.emitter.start(true, 800, null, 15);
 
 	meteor.healthPoint -= 1;
 	if(meteor.healthPoint <= 0){
-
 		if(this.playerBonus == ''  && this.bonusDropped == false){
 			this.dropBonus(meteor.x, meteor.y);
 		}
@@ -506,35 +508,43 @@ level1.removeTextPoint = function(text){
 	text.destroy();
 },
 level1.dropBonus = function(spriteX, spriteY){
-	number = this.game.rnd.pick([1, 2, 3 , 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
-	bonusKey = '';
-	switch(number){
-		case 5 :
-			bonusKey = 'shield_bonus';
-			break;
-		case 4 :
-			bonusKey = 'multiammo';
-			break;
-		case 3 :
-			bonusKey = 'friend_bonus';
-			break;
-		case 2 :
-			bonusKey = 'missile';
-			break;
-		case 1 :
-			bonusKey = 'pill';
-			break;
-		break; 
-	}
-	if(bonusKey != ''){
-		this.bonusDropped = true;
 
-		bonusSprite = this.game.add.sprite(spriteX, spriteY, bonusKey);
-		bonusSprite.anchor.setTo(0.5, 0.5);
-		bonusSprite.scale.setTo(0.8, 0.8);
-	    this.bonuses.add(bonusSprite);
+	if(spriteX > 80 && spriteX < 720 && spriteY > 80 && spriteY < 520){
+		number = this.game.rnd.pick([1, 2, 3 , 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
+		bonusKey = '';
+		switch(number){
+			case 5 :
+				bonusKey = 'shield_bonus';
+				break;
+			case 4 :
+				bonusKey = 'multiammo';
+				break;
+			case 3 :
+				bonusKey = 'friend_bonus';
+				break;
+			case 2 :
+				bonusKey = 'missile';
+				break;
+			case 1 :
+			case 6 :
+			case 7 :
+			case 8 :
+				if(this.game.global.life < 4){
+					bonusKey = 'pill';
+				}
+				break;
+			break; 
+		}
+		if(bonusKey != ''){
+			this.bonusDropped = true;
 
-		this.game.time.events.add(8000, this.resetBonus, this, bonusSprite);
+			bonusSprite = this.game.add.sprite(spriteX, spriteY, bonusKey);
+			bonusSprite.anchor.setTo(0.5, 0.5);
+			bonusSprite.scale.setTo(0.8, 0.8);
+		    this.bonuses.add(bonusSprite);
+
+			this.game.time.events.add(8000, this.resetBonus, this, bonusSprite);
+		}
 	}
 },
 level1.resetBonus = function(sprite){
