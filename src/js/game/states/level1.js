@@ -7,9 +7,9 @@ level1.create = function () {
   this.game.time.slowMotion = 1.0;
 
   this.playerBonus = '';
-  this.bonusDropped = false;
   this.bonusTimerSize = 1;
   this.shield = null;
+  this.bonusDropped = false;
   
   this.nextShotPowerUpAt = 0;
   this.practiceMode = false;
@@ -78,6 +78,10 @@ level1.create = function () {
   this.emitter.setXSpeed(-150, 150);
   this.emitter.setScale(2, 0, 2, 0, 800);
   this.emitter.gravity = 0;
+
+  this.bonuses = this.game.add.group();
+  this.bonuses.enableBody = true;
+  this.game.physics.arcade.enable(this.bonuses);
 
   // Meteors
   this.meteors = this.game.add.group();
@@ -161,22 +165,8 @@ level1.update = function () {
 			null, this);
 
 		// Bonus collectables
-		if(this.star!=null){
-			this.game.physics.arcade.overlap(this.player, this.star, this.takeBonus,
+		this.game.physics.arcade.overlap(this.player, this.bonuses, this.takeBonus,
 			null, this);
-		}
-		if(this.multiammo!=null){
-			this.game.physics.arcade.overlap(this.player, this.multiammo, this.takeBonus,
-			null, this);
-		}
-		if(this.homingMissile!=null){
-			this.game.physics.arcade.overlap(this.player, this.homingMissile, this.takeBonus,
-			null, this);
-		}
-		if(this.friendBonus!=null){
-			this.game.physics.arcade.overlap(this.player, this.friendBonus, this.takeBonus,
-			null, this);
-		}
 
 		if(this.friend.follow){
 			this.game.physics.arcade.overlap(this.weaponFriend.bullets, this.enemies, this.enemyDie,
@@ -302,7 +292,7 @@ level1.resetPlayer = function() {
 level1.takeBonus = function(player, bonus) {
 	this.coinSound.play();
 	this.playerBonus = bonus.key;
-	if(bonus.key == 'star'){
+	if(bonus.key == 'shield_bonus'){
 		this.shield = this.game.add.sprite(this.player.x + 30, this.player.y - 30, 'shield');
 		this.game.physics.arcade.enable(this.shield);
 		this.shield.anchor.setTo(0.5, 0.5);
@@ -312,11 +302,18 @@ level1.takeBonus = function(player, bonus) {
 		this.friend.follow = true;
 	}
 
-	this.bonusDropped = false;
-	this.bonusTimer.visible = true;
-	this.bonusLabel.visible = true;
+	if(bonus.key == 'pill'){
+		this.life4 = this.game.add.sprite(this.game.width - 190, 40, 'life');
+		this.game.global.life += 1;
+	}
+	else{
+		this.bonusTimer.visible = true;
+		this.bonusLabel.visible = true;
+		this.game.time.events.add(10000, this.stopBonus, this);
+	}
+
 	bonus.kill();
-	this.game.time.events.add(10000, this.stopBonus, this);
+	this.bonusDropped == false;
 },
 level1.addEnemy = function() {
 	var enemy = this.enemies.getFirstDead();
@@ -463,7 +460,7 @@ level1.touchMeteor = function(laser, meteor) {
 	meteor.healthPoint -= 1;
 	if(meteor.healthPoint <= 0){
 
-		if(this.playerBonus == '' && this.bonusDropped == false){
+		if(this.playerBonus == ''  && this.bonusDropped == false){
 			this.dropBonus(meteor.x, meteor.y);
 		}
 		meteor.kill();
@@ -505,38 +502,40 @@ level1.removeTextPoint = function(text){
 	text.destroy();
 },
 level1.dropBonus = function(spriteX, spriteY){
-	number = this.game.rnd.pick([1, 2, 3 , 4, 5]);
-	this.bonusDropped = true;
+	number = this.game.rnd.pick([1, 2, 3 , 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
+	bonusKey = '';
 	switch(number){
 		case 5 :
-			this.star = this.game.add.sprite(spriteX, spriteY, 'star');
-			this.star.anchor.setTo(0.5, 0.5);
-			this.star.scale.setTo(0.8, 0.8);
-			this.game.physics.arcade.enable(this.star);
+			bonusKey = 'shield_bonus';
 			break;
 		case 4 :
-			this.multiammo = this.game.add.sprite(spriteX, spriteY, 'multiammo');
-			this.multiammo.anchor.setTo(0.5, 0.5);
-			this.multiammo.scale.setTo(0.8, 0.8);
-			this.game.physics.arcade.enable(this.multiammo);
+			bonusKey = 'multiammo';
 			break;
 		case 3 :
-			this.friendBonus = this.game.add.sprite(spriteX, spriteY, 'friend_bonus');
-			this.friendBonus.anchor.setTo(0.5, 0.5);
-			this.friendBonus.scale.setTo(0.8, 0.8);
-			this.game.physics.arcade.enable(this.friendBonus);
+			bonusKey = 'friend_bonus';
 			break;
 		case 2 :
-			this.homingMissile = this.game.add.sprite(spriteX, spriteY, 'missile');
-			this.homingMissile.anchor.setTo(0.5, 0.5);
-			this.homingMissile.scale.setTo(0.8, 0.8);
-			this.game.physics.arcade.enable(this.homingMissile);
+			bonusKey = 'missile';
 			break;
 		case 1 :
-			this.bonusDropped = false;
-			break;   
+			bonusKey = 'pill';
+			break;
+		break; 
 	}
+	if(bonusKey != ''){
+		this.bonusDropped = true;
 
+		bonusSprite = this.game.add.sprite(spriteX, spriteY, bonusKey);
+		bonusSprite.anchor.setTo(0.5, 0.5);
+		bonusSprite.scale.setTo(0.8, 0.8);
+	    this.bonuses.add(bonusSprite);
+
+		this.game.time.events.add(10000, this.resetBonus, this, bonusSprite);
+	}
+},
+level1.resetBonus = function(sprite){
+	sprite.kill();
+	this.bonusDropped = false;
 }
 
 module.exports = level1;
