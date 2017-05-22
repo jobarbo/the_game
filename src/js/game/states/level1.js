@@ -4,16 +4,18 @@ level1.create = function () {
 
   this.game.global.life = 3;
   this.game.global.score = 0;
+  this.game.time.slowMotion = 1.0;
+
   this.playerBonus = '';
   this.bonusDropped = false;
   this.bonusTimerSize = 1;
   this.shield = null;
+  
   this.nextShotPowerUpAt = 0;
   this.practiceMode = false;
-  this.pointToNextLevel = 100;
   this.currentLevel = 1;
   this.enemyLife = 10;
-  this.game.time.slowMotion = 1.0;
+  this.pointToNextLevel = 100;
   this.delayMeteor = 4000;
   this.delayEnemy = 2500;
   this.finish = false;
@@ -70,7 +72,7 @@ level1.create = function () {
   this.life3 = this.game.add.sprite(this.game.width - 70, 40, 'life');
 
   // Emitter
-  this.emitter = this.game.add.emitter(0, 0, 15);
+  this.emitter = this.game.add.emitter(0, 0, 100);
   this.emitter.makeParticles('pixel');
   this.emitter.setYSpeed(-150, 150);
   this.emitter.setXSpeed(-150, 150);
@@ -103,7 +105,7 @@ level1.create = function () {
 
   // Lasers
 
-  this.weapon = this.game.add.weapon(20, 'laser_green');
+  this.weapon = this.game.add.weapon(30, 'laser_green');
   this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
   this.weapon.bulletSpeed = 400;
   this.weapon.fireRate = 200;
@@ -147,8 +149,12 @@ level1.update = function () {
 		// Overlap
 		this.game.physics.arcade.overlap(this.player, this.enemies, this.playerDie,
 			null, this);
-		this.game.physics.arcade.overlap(this.player, this.meteors, this.playerDie,
-			null, this);
+
+		if(this.shield == null){
+			this.game.physics.arcade.overlap(this.player, this.meteors, this.playerDie,
+				null, this);
+		}
+		
 		this.game.physics.arcade.overlap(this.weapon.bullets, this.meteors, this.touchMeteor,
 			null, this);
 		this.game.physics.arcade.overlap(this.weapon.bullets, this.enemies, this.enemyDie,
@@ -273,10 +279,15 @@ level1.update = function () {
 	if(this.shield != null){
 		this.game.physics.arcade.overlap(this.shield, this.enemies, this.enemyDie,
 			null, this);
-		this.game.physics.arcade.overlap(this.shield, this.meteors, this.hitMeteor,
-			null, this);
 		this.game.physics.arcade.moveToObject(this.shield, this.player, 50, 50);
 	}
+
+
+	  this.meteors.forEach((b) => {
+	  	b.rotation += 0.01;
+	  }, this);
+
+
 }, // End update()
 
 level1.startMenu = function() {
@@ -289,7 +300,7 @@ level1.resetPlayer = function() {
 	this.player.reset(this.game.width/2, this.game.world.centerY + 100);
 },
 level1.takeBonus = function(player, bonus) {
-	//this.coinSound.play();
+	this.coinSound.play();
 	this.playerBonus = bonus.key;
 	if(bonus.key == 'star'){
 		this.shield = this.game.add.sprite(this.player.x + 30, this.player.y - 30, 'shield');
@@ -301,6 +312,7 @@ level1.takeBonus = function(player, bonus) {
 		this.friend.follow = true;
 	}
 
+	this.bonusDropped = false;
 	this.bonusTimer.visible = true;
 	this.bonusLabel.visible = true;
 	bonus.kill();
@@ -323,6 +335,12 @@ level1.addEnemy = function() {
 level1.playerDie = function() {
 
 	if(!this.player.invincible){
+
+		this.emitter.forEach (function(particle){ 
+			particle.key = 'pixel';
+			particle.loadTexture('pixel', 0);
+		}, this);
+
 		this.emitter.x = this.player.x;
 		this.emitter.y = this.player.y;
 		this.emitter.start(true, 800, null, 15);
@@ -367,41 +385,24 @@ level1.enemyDie = function(sprite, enemy) {
 	if(enemy.healthPoint <= 0){
 		enemy.kill();
 
-		number = this.game.rnd.pick([1, 2, 3 , 4, 5]);
+		// Points label
+		this.pointsLabel = this.game.add.text(enemyX, enemyY - 5, '+10pts',
+			{ font: '16px Arial', fill: '#ffffff' });
+		this.pointsLabel.alpha = 0;
+		this.game.add.tween(this.pointsLabel).to( { alpha: 1 }, 1200, "Linear", true);
+		this.game.add.tween(this.pointsLabel).to( { y: (enemyY - 30) }, 1000, "Linear", true);
+		this.game.time.events.add(1200, this.removeTextPoint, this, this.pointsLabel);
+ 	   
 		if(this.playerBonus == '' && this.bonusDropped == false){
-			this.bonusDropped = true;
-			switch(number){
-				case 5 :
-					this.star = this.game.add.sprite(enemyX, enemyY, 'star');
-					this.star.anchor.setTo(0.5, 0.5);
-					this.star.scale.setTo(0.8, 0.8);
-					this.game.physics.arcade.enable(this.star);
-					break;
-				case 4 :
-					this.multiammo = this.game.add.sprite(enemyX, enemyY, 'multiammo');
-					this.multiammo.anchor.setTo(0.5, 0.5);
-					this.multiammo.scale.setTo(0.8, 0.8);
-					this.game.physics.arcade.enable(this.multiammo);
-					break;
-				case 3 :
-					this.friendBonus = this.game.add.sprite(enemyX, enemyY, 'friend_bonus');
-					this.friendBonus.anchor.setTo(0.5, 0.5);
-					this.friendBonus.scale.setTo(0.8, 0.8);
-					this.game.physics.arcade.enable(this.friendBonus);
-					break;
-				case 2 :
-					this.homingMissile = this.game.add.sprite(enemyX, enemyY, 'missile');
-					this.homingMissile.anchor.setTo(0.5, 0.5);
-					this.homingMissile.scale.setTo(0.8, 0.8);
-					this.game.physics.arcade.enable(this.homingMissile);
-					break;
-				case 1 :
-					//
-					break;   
-			}
+			this.dropBonus(enemyX, enemyY);
 		}
 
 		this.increaseScore(10);
+
+		this.emitter.forEach (function(particle){ 
+			particle.key = 'pixel';
+			particle.loadTexture('pixel', 0);
+		}, this);
 
 		this.emitter.x = enemy.x;
 		this.emitter.y = enemy.y;
@@ -419,8 +420,9 @@ level1.addMeteor = function() {
 	var angle = this.game.rnd.pick([0,20,40,60,80,100]);
 	meteor.key = key;
 	meteor.loadTexture(key, 0);
-	meteor.anchor.setTo(0.5, 1);
+	meteor.anchor.setTo(0.5, 0.5);
 	meteor.angle = angle;
+	meteor.healthPoint = 3;
 
 	var direction = this.game.rnd.pick(['horizontal', 'vertical']); 
 	if(direction == 'vertical'){
@@ -437,11 +439,35 @@ level1.addMeteor = function() {
 	meteor.checkWorldBounds = true;
 	meteor.outOfBoundsKill = true;
 },
-level1.hitMeteor = function(shield, meteor) {
-	meteor.kill();
-},
 level1.touchMeteor = function(laser, meteor) {
 	laser.kill();
+
+	if(meteor.key == 'meteor_grey' || meteor.key == 'meteor_grey_med'){
+
+		this.emitter.forEach (function(particle){ 
+			particle.key = 'pixel_grey';
+			particle.loadTexture('pixel_grey', 0);
+		}, this);
+	}
+	else{
+		this.emitter.forEach (function(particle){ 
+			particle.key = 'pixel_brown';
+			particle.loadTexture('pixel_brown', 0);
+		}, this);
+	}
+
+	this.emitter.x = meteor.x;
+	this.emitter.y = meteor.y;
+	this.emitter.start(true, 800, null, 15);
+
+	meteor.healthPoint -= 1;
+	if(meteor.healthPoint <= 0){
+
+		if(this.playerBonus == '' && this.bonusDropped == false){
+			this.dropBonus(meteor.x, meteor.y);
+		}
+		meteor.kill();
+	}
 },
 
 level1.stopBonus = function() {
@@ -458,7 +484,6 @@ level1.stopBonus = function() {
 	this.bonusTimer.scale.setTo(1,1);
 	this.bonusTimerSize = 1;
 	this.playerBonus = '';
-	this.bonusDropped = false;
 },
 level1.toggleInvincible = function() {
 	this.player.invincible = !this.player.invincible;
@@ -475,6 +500,43 @@ level1.increaseScore = function(score){
 		this.game.time.slowMotion = 2.0;
 		this.game.time.events.add(5000, this.startNextLevel, this);
 	}
+},
+level1.removeTextPoint = function(text){
+	text.destroy();
+},
+level1.dropBonus = function(spriteX, spriteY){
+	number = this.game.rnd.pick([1, 2, 3 , 4, 5]);
+	this.bonusDropped = true;
+	switch(number){
+		case 5 :
+			this.star = this.game.add.sprite(spriteX, spriteY, 'star');
+			this.star.anchor.setTo(0.5, 0.5);
+			this.star.scale.setTo(0.8, 0.8);
+			this.game.physics.arcade.enable(this.star);
+			break;
+		case 4 :
+			this.multiammo = this.game.add.sprite(spriteX, spriteY, 'multiammo');
+			this.multiammo.anchor.setTo(0.5, 0.5);
+			this.multiammo.scale.setTo(0.8, 0.8);
+			this.game.physics.arcade.enable(this.multiammo);
+			break;
+		case 3 :
+			this.friendBonus = this.game.add.sprite(spriteX, spriteY, 'friend_bonus');
+			this.friendBonus.anchor.setTo(0.5, 0.5);
+			this.friendBonus.scale.setTo(0.8, 0.8);
+			this.game.physics.arcade.enable(this.friendBonus);
+			break;
+		case 2 :
+			this.homingMissile = this.game.add.sprite(spriteX, spriteY, 'missile');
+			this.homingMissile.anchor.setTo(0.5, 0.5);
+			this.homingMissile.scale.setTo(0.8, 0.8);
+			this.game.physics.arcade.enable(this.homingMissile);
+			break;
+		case 1 :
+			this.bonusDropped = false;
+			break;   
+	}
+
 }
 
 module.exports = level1;
