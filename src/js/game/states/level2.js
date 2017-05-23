@@ -206,6 +206,8 @@ level2.create = function () {
 
 level2.update = function () {
 
+	this.background.tilePosition.y += 1;
+
 	if(!this.finish){
 		// Overlap
 		this.game.physics.arcade.overlap(this.player, this.enemies, this.playerDie,
