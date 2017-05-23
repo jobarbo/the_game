@@ -52,6 +52,9 @@ level3.create = function () {
   this.player.invincible = false;
   this.player.body.collideWorldBounds = true;
 
+  this.player.alpha = 0.1;
+  this.toggleInvincible();
+  this.game.time.events.add(2500, this.toggleInvincible, this);
 
   // Add Friend
   this.friend = this.game.add.sprite(-100, this.game.world.centerY + 100, 'friend');
