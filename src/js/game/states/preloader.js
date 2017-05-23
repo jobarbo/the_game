@@ -15,6 +15,7 @@ preloader.preload = function () {
   this.game.load.image('missile', 'images/collectables/missile.png');
   this.game.load.image('friend_bonus', 'images/collectables/friend.png');
   this.game.load.image('enemy', 'images/ennemies/enemyRed2.png');
+  this.game.load.image('second_enemy', 'images/ennemies/spaceShips_004.png');
   this.game.load.image('boss', 'images/ennemies/enemyBlack1.png');
   this.game.load.image('pixel', 'images/pixel.png');
   this.game.load.image('pixel_brown', 'images/pixel_brown.png');

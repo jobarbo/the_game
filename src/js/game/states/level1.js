@@ -17,8 +17,10 @@ level1.create = function () {
   this.enemyLife = 20;
   this.maxEnemyLife = 20;
   this.pointToNextLevel = 100;
+  this.pointPerEnemy = 10;
   this.delayMeteor = 4000;
   this.delayEnemy = 2500;
+  this.pointPerEnemy = 10;
   this.finish = false;
 
   // Background
@@ -138,7 +140,7 @@ level1.create = function () {
   this.bonusTimer.visible = false;
 
   // Labels
-  this.scoreLabel = this.game.add.text(50, 20, 'Score: 0',
+  this.scoreLabel = this.game.add.text(50, 20, 'Score: 0/' + this.pointToNextLevel,
   	{ font: '22px Arial', fill: '#ffffff' });
   this.levelLabel = this.game.add.text(this.game.world.centerX, 20, 'Level ' + this.currentLevel,
   	{ font: '22px Arial', fill: '#ffffff' });
@@ -156,7 +158,7 @@ level1.create = function () {
   this.laserSound = this.game.add.audio('laser');
 
   // Keys
-	this.spacebar = this.game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
+  this.spacebar = this.game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
   this.wasd = {
   	up: this.game.input.keyboard.addKey(Phaser.Keyboard.W),
   	down: this.game.input.keyboard.addKey(Phaser.Keyboard.S),
@@ -203,16 +205,14 @@ level1.update = function () {
 	if(!this.practiceMode){
 		// Meteors spawn
 		if (this.nextMeteor < this.game.time.now) {
-			var delay = this.delayMeteor;
 			this.addMeteor();
-			this.nextMeteor = this.game.time.now + delay;
+			this.nextMeteor = this.game.time.now + this.delayMeteor;
 		}
 
 		// Ennemies spawn
 		if (this.nextEnemy < this.game.time.now) {
-			var delay = this.delayEnemy;
 			this.addEnemy();
-			this.nextEnemy = this.game.time.now + delay;
+			this.nextEnemy = this.game.time.now + this.delayEnemy;
 		}	
 	}
 	
@@ -376,7 +376,6 @@ level1.playerDie = function() {
 			this.game.time.events.add(1000, this.resetPlayer, this);
 		}
 		else{
-			this.life.kill();
 			this.finishLabel.text = 'YOU LOSE';
 			this.finish = true;
 			this.game.add.tween(this.finishLabel).to( { alpha: 1 }, 2500, "Linear", true);
@@ -410,8 +409,13 @@ level1.damageEnemy = function(sprite, enemy) {
 	if(enemy.healthPoint <= 0){
 		enemy.kill();
 
+		var pointForKill = this.pointPerEnemy;
+		if(enemy.key == 'second_enemy'){
+			pointForKill = pointForKill *2;
+		}
+
 		// Points label
-		this.pointsLabel = this.game.add.text(enemyX, enemyY - 5, '+10pts',
+		this.pointsLabel = this.game.add.text(enemyX, enemyY - 5, '+' + pointForKill + 'pts',
 			{ font: '16px Arial', fill: '#ffffff' });
 		this.pointsLabel.alpha = 0;
 		this.game.add.tween(this.pointsLabel).to( { alpha: 1 }, 1200, "Linear", true);
@@ -422,7 +426,7 @@ level1.damageEnemy = function(sprite, enemy) {
 			this.dropBonus(enemyX, enemyY);
 		}
 
-		this.increaseScore(10);
+		this.increaseScore(pointForKill);
 
 		this.emitter.x = enemyX;
 		this.emitter.y = enemyY;
@@ -519,7 +523,7 @@ level1.toggleInvincible = function() {
 },
 level1.increaseScore = function(score){
 	this.game.global.score += score;
-	this.scoreLabel.text = 'Score: ' + this.game.global.score;
+	this.scoreLabel.text = 'Score: ' + this.game.global.score + '/' + this.pointToNextLevel;
 	if(this.game.global.score >= this.pointToNextLevel){
 		this.finish = true;
 		this.game.add.tween(this.finishLabel).to( { alpha: 1 }, 2500, "Linear", true);
