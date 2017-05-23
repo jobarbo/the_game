@@ -31,6 +31,10 @@ preloader.preload = function () {
 
   this.game.load.audio('coin', 'audio/powerup.mp3');
   this.game.load.audio('laser', 'audio/laser.mp3');
+  this.game.load.audio('intro', 'audio/intro.ogg');
+  this.game.load.audio('boss', 'audio/boss.ogg');
+  this.game.load.audio('level1', 'audio/level2.ogg');
+  this.game.load.audio('level2', 'audio/level4.ogg');
 };
 
 preloader.create = function () {

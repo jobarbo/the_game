@@ -189,6 +189,9 @@ level2.create = function () {
   this.coinSound = this.game.add.audio('coin');
   this.laserSound = this.game.add.audio('laser');
 
+  this.level2Music = this.game.add.audio('level2');
+  this.level2Music.play();
+
   // Keys
   this.spacebar = this.game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
   this.wasd = {
@@ -366,6 +369,7 @@ level2.startMenu = function() {
 	this.game.state.start('mainTitle');
 },
 level2.startNextLevel = function () {
+	this.level2Music.stop();
 	this.game.state.start('level' + (this.currentLevel + 1) );
 },
 level2.resetPlayer = function() {

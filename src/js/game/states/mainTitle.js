@@ -37,6 +37,9 @@ mainTitle.create = function () {
   { font: '25px Arial', fill: '#ffffff', align: 'center' });
   scoreLabel.anchor.setTo(0.5, 0.5);
 
+  this.introMusic = this.game.add.audio('intro');
+  this.introMusic.play();
+
 },
 
 mainTitle.update = function () {
@@ -50,6 +53,7 @@ mainTitle.update = function () {
 },
 
 mainTitle.startLevel1 = function () {
+  this.introMusic.stop();
 	this.game.state.start('level1');
 }
 

@@ -46,7 +46,7 @@ level1.create = function () {
   this.game.physics.arcade.enable(this.player);
   this.player.body.drag.set(800);
   this.player.body.maxVelocity.set(500);
-  this.player.invincible = false;
+  this.player.invincible = true;
   this.player.body.collideWorldBounds = true;
 
   this.player.alpha = 0.1;
@@ -160,6 +160,9 @@ level1.create = function () {
   this.coinSound = this.game.add.audio('coin');
   this.laserSound = this.game.add.audio('laser');
 
+  this.level1Music = this.game.add.audio('level1');
+  this.level1Music.play();
+
   // Keys
   this.spacebar = this.game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
   this.wasd = {
@@ -172,6 +175,8 @@ level1.create = function () {
 },
 
 level1.update = function () {
+
+	this.background.tilePosition.y += 1;
 
 	if(!this.finish){
 		// Overlap
@@ -308,6 +313,7 @@ level1.startMenu = function() {
 	this.game.state.start('mainTitle');
 },
 level1.startNextLevel = function () {
+	this.level1Music.stop();
 	this.game.state.start('level' + (this.currentLevel + 1) );
 },
 level1.resetPlayer = function() {

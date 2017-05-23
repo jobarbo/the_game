@@ -245,6 +245,9 @@ level3.create = function () {
   this.coinSound = this.game.add.audio('coin');
   this.laserSound = this.game.add.audio('laser');
 
+  this.bossMusic = this.game.add.audio('boss');
+  this.bossMusic.play();
+
   // Keys
   this.spacebar = this.game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
   this.wasd = {
@@ -778,6 +781,7 @@ level3.damageBoss = function(boss, laser) {
   }
 },
 level3.finishGame = function () {
+  this.bossMusic.stop();
   this.game.state.start('finish');
 }
 
