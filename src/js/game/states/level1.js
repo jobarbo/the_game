@@ -46,7 +46,7 @@ level1.create = function () {
   this.game.physics.arcade.enable(this.player);
   this.player.body.drag.set(800);
   this.player.body.maxVelocity.set(500);
-  this.player.invincible = true;
+  this.player.invincible = false;
   this.player.body.collideWorldBounds = true;
 
   this.player.alpha = 0.1;
