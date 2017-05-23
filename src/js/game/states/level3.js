@@ -462,6 +462,7 @@ level3.update = function () {
 }, // End update()
 
 level3.startMenu = function() {
+	this.bossMusic.stop();
 	this.game.state.start('mainTitle');
 },
 level3.startNextLevel = function () {

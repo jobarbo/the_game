@@ -310,6 +310,7 @@ level1.update = function () {
 }, // End update()
 
 level1.startMenu = function() {
+	this.level1Music.stop();
 	this.game.state.start('mainTitle');
 },
 level1.startNextLevel = function () {

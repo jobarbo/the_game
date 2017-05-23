@@ -366,6 +366,7 @@ level2.update = function () {
 }, // End update()
 
 level2.startMenu = function() {
+	this.level2Music.stop();
 	this.game.state.start('mainTitle');
 },
 level2.startNextLevel = function () {
