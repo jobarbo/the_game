@@ -38,6 +38,7 @@ mainTitle.create = function () {
   scoreLabel.anchor.setTo(0.5, 0.5);
 
   this.introMusic = this.game.add.audio('intro');
+  this.introMusic.volume = 0.7;
   this.introMusic.play();
 
 },

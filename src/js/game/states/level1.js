@@ -161,6 +161,7 @@ level1.create = function () {
   this.laserSound = this.game.add.audio('laser');
 
   this.level1Music = this.game.add.audio('level1');
+  this.level1Music.volume = 0.7;
   this.level1Music.play();
 
   // Keys
