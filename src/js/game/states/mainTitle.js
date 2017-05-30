@@ -8,15 +8,6 @@ mainTitle.create = function () {
   background.anchor.setTo(0.5, 0.5);
   background.scale.setTo(3.4, 3.4);
 
-  var logo = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY - 100, 'logo');
-  logo.anchor.setTo(0.5, 0.5);
-
-  this.button = this.game.add.button(this.game.world.centerX - 120, this.game.world.centerY + 120, 'button', this.startLevel1,
-		this);
-
-  this.startLabel = this.game.add.text(this.game.world.centerX - 40, this.game.world.centerY + 127, 'Jouer',
-		{ font: '22px Arial', fill: '#000000' });
-
   // add Spacebar key
   this.keys = [Phaser.KeyCode.SPACEBAR];
   this.phaserKeys = this.game.input.keyboard.addKeys(this.keys);
@@ -31,15 +22,30 @@ mainTitle.create = function () {
     localStorage.setItem('bestScore', this.game.global.score);
   }
 
-  var text = 'score: ' + this.game.global.score + '\nbest score: ' +
-  localStorage.getItem('bestScore');
-  var scoreLabel = this.game.add.text(this.game.width/2, this.game.height/2+ 90, text,
-  { font: '25px Arial', fill: '#ffffff', align: 'center' });
-  scoreLabel.anchor.setTo(0.5, 0.5);
+  var highscoreLabel = this.game.add.text(this.game.world.centerX, 60, 'High score: ' + localStorage.getItem('bestScore'),
+    { font: '30px Arial', fill: '#ffffff' });
+
+  /*var scoreLabel = this.game.add.text(50, 20, 'Score: ' + this.game.global.score,
+  { font: '22px Arial', fill: '#ffffff', align: 'center' });
+  scoreLabel.anchor.setTo(0.5, 0.5);*/
+
+  highscoreLabel.anchor.setTo(0.5, 0.5);
 
   this.introMusic = this.game.add.audio('intro');
   this.introMusic.volume = 0.7;
   this.introMusic.play();
+
+  this.startLabel = this.game.add.text(this.game.world.centerX, 250, 'Play',
+    { font: '40px Arial', fill: '#ffffff' });
+  this.startLabel.anchor.setTo(0.5, 0.5);
+  this.startLabel.inputEnabled = true;
+  this.startLabel.events.onInputDown.add(this.startLevel1, this);
+
+  this.chooseShipLabel = this.game.add.text(this.game.world.centerX, 320, 'Choose Ship',
+    { font: '40px Arial', fill: '#ffffff' });
+  this.chooseShipLabel.anchor.setTo(0.5, 0.5);
+  this.chooseShipLabel.inputEnabled = true;
+  this.chooseShipLabel.events.onInputDown.add(this.chooseShip, this);
 
 },
 
@@ -56,6 +62,11 @@ mainTitle.update = function () {
 mainTitle.startLevel1 = function () {
   this.introMusic.stop();
 	this.game.state.start('level1');
+}
+
+mainTitle.chooseShip = function () {
+  this.introMusic.stop();
+  this.game.state.start('choose');
 }
 
 module.exports = mainTitle;

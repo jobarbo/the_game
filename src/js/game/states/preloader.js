@@ -4,7 +4,9 @@ preloader.preload = function () {
   this.game.load.image('logo', 'images/phaser.png');
   this.game.load.image('button', 'images/button_green.png');
   this.game.load.image('background', 'images/background/bg.png');
-  this.game.load.image('player', 'images/player/playerShip2_green.png');
+  this.game.load.image('ship1', 'images/player/ship1.png');
+  this.game.load.image('ship2', 'images/player/ship2.png');
+  this.game.load.image('ship3', 'images/player/ship3.png');
   this.game.load.image('friend', 'images/player/friend1.png');
   this.game.load.image('life', 'images/player/life_green.png');
   this.game.load.image('laser', 'images/laserr.png');
@@ -35,6 +37,7 @@ preloader.preload = function () {
   this.game.load.audio('boss', 'audio/boss.ogg');
   this.game.load.audio('level1', 'audio/level2.ogg');
   this.game.load.audio('level2', 'audio/level4.ogg');
+  this.game.load.audio('pimp', 'audio/get_low.mp3');
 };
 
 preloader.create = function () {

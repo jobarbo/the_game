@@ -40,7 +40,7 @@ level1.create = function () {
   
 
   // Add player
-  this.player = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY + 100, 'player');
+  this.player = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY + 100, this.game.global.ship);
   this.player.anchor.setTo(0.5, 0.5);
   this.player.scale.setTo(0.5,0.5);
   this.game.physics.arcade.enable(this.player);
