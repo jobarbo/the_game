@@ -8,15 +8,19 @@ var states = {
   level1: require('./states/level1.js'),
   level2: require('./states/level2.js'),
   level3: require('./states/level3.js'),
-  finish: require('./states/finish.js')
+  finish: require('./states/finish.js'),
+  choose: require('./states/choose.js')
 };
 
 var game = new Phaser.Game(properties.size.x, properties.size.y, Phaser.AUTO, '', null, false, false);
 
 game.global = {
 	score: 0,
-	life: 3
+	life: 3,
+  ship: 'ship1'
 };
+
+
 
 // Automatically register each state.
 _.each(states, function(state, key) {
