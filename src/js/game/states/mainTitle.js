@@ -102,7 +102,7 @@ mainTitle.createText = function () {
 
 mainTitle.startLevel1 = function () {
   this.introMusic.stop();
-	this.game.state.start('level3');
+	this.game.state.start('game');
 },
 
 mainTitle.chooseShip = function () {

@@ -1,8 +1,7 @@
-var level1 = {};
+var game = {};
 
-level1.create = function () {
+game.create = function () {
 
-  this.game.global.life = 3;
   this.game.global.score = 0;
   this.game.time.slowMotion = 1.0;
 
@@ -10,18 +9,25 @@ level1.create = function () {
   this.bonusTimerSize = 1;
   this.shield = null;
   this.bonusDropped = false;
-  
   this.nextShotAt = 0;
   this.practiceMode = false;
-  this.currentLevel = 1;
-  this.enemyLife = 20;
-  this.maxEnemyLife = 20;
-  this.pointToNextLevel = 100;
-  this.pointPerEnemy = 10;
-  this.delayMeteor = 4000;
-  this.delayEnemy = 2500;
   this.pointPerEnemy = 10;
   this.finish = false;
+  this.deployBoss = false;
+
+  if(this.game.global.level % 3 == 0){
+  	this.deployBoss = true;
+  }
+  
+  this.pointToNextLevel = 100;
+  this.maxEnemyLife = 10 + (this.game.global.level * 10);
+  this.delayMeteor = 4000 / (this.game.global.level/1.5);
+  this.delayEnemy = 2500 / (this.game.global.level/1.5);
+  this.delaySecondEnemy = 5000 / (this.game.global.level/1.5);
+
+  this.bossLife = 500;
+  this.maxBossLife = 500;
+  this.bossDirection = 'left';
 
   // Background
   this.background = this.game.add.tileSprite(this.game.world.centerX - 10, this.game.world.centerY, 800, 600, 'background');
@@ -94,6 +100,21 @@ level1.create = function () {
   this.game.physics.arcade.enable(this.enemies);
   this.nextEnemy = 0;
 
+    // Ennemies shooter
+    this.secondEnemies = this.game.add.group();
+    this.secondEnemies.createMultiple(10, 'second_enemy');
+    for (i = 0; i <this.secondEnemies.length ; i++) {
+  	  this.secondEnemies.children[i].scale.setTo(0.8,0.8);
+
+  	  // add lifebar to enemy
+  	  secondEnemyLifeBar = this.game.add.sprite(this.secondEnemies.children[i].x, this.secondEnemies.children[i].y - 110, bmdEnemy);
+  	  secondEnemyLifeBar.anchor.setTo(0.5, 0.5);
+  	  this.secondEnemies.children[i].addChild(secondEnemyLifeBar);
+    }
+    this.secondEnemies.enableBody = true;
+    this.game.physics.arcade.enable(this.secondEnemies);
+    this.nextSecondEnemy = 0;
+
   // Lasers
   this.weapon = this.game.add.weapon(30, 'laser_green');
   this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
@@ -122,6 +143,73 @@ level1.create = function () {
   }, this);
   this.weaponFriend.bulletAngleOffset = 90;
 
+    // Lasers
+    this.weaponEnemy = this.game.add.weapon(30, 'laser');
+    this.weaponEnemy.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+    this.weaponEnemy.bulletSpeed = 400;
+    this.weaponEnemy.fireRate = 500;
+    this.weaponEnemy.fireAngle = 90;
+    this.game.physics.arcade.enable(this.weaponEnemy);
+    this.weaponEnemy.trackSprite(this.player, 0, 0, false);
+    this.weaponEnemy.bullets.forEach((b) => {
+    	b.scale.setTo(0.5, 0.5);
+  	b.body.updateBounds();
+    }, this);
+    this.weaponEnemy.bulletAngleOffset = 90;
+
+  // Add Boss
+  if(this.deployBoss){
+  	this.boss = this.game.add.sprite(this.game.width/2, -100, 'boss');
+  	this.boss.anchor.setTo(0.5, 0.5);
+  	this.boss.scale.setTo(2,2);
+  	this.game.physics.arcade.enable(this.boss);
+  	this.boss.body.velocity.y = 50;
+  	this.boss.healthPoint = this.bossLife;
+
+  	// Boss lifebar
+  	var bmdBoss = this.game.add.bitmapData(200, 8);
+  	bmdBoss.ctx.beginPath();
+  	bmdBoss.ctx.rect(0, 0, 200, 8);
+  	bmdBoss.ctx.fillStyle = '#c0392b';
+  	bmdBoss.ctx.fill();
+  	this.bossLifeBar = this.game.add.sprite(this.boss.x, this.boss.y, bmdBoss);
+  	this.bossLifeBar.anchor.setTo(0.5, 0.5);
+
+  	  //  An explosion pool
+  	explosions = this.game.add.group();
+  	explosions.enableBody = true;
+  	explosions.physicsBodyType = Phaser.Physics.ARCADE;
+  	explosions.createMultiple(30, 'explosion');
+  	explosions.setAll('anchor.x', 0.5);
+  	explosions.setAll('anchor.y', 0.5);
+  	explosions.forEach( function(explosion) {
+  	    explosion.animations.add('explosion');
+  	});
+
+  	//  Big explosion for boss
+  	this.bossDeath = this.game.add.emitter(this.boss.x, this.boss.y);
+  	this.bossDeath.width = this.boss.width / 2;
+  	this.bossDeath.height = this.boss.height / 2;
+  	this.bossDeath.makeParticles('explosion', [0,1,2,3,4,5,6,7], 20);
+  	this.bossDeath.setAlpha(0.9, 0, 900);
+  	this.bossDeath.setScale(0.3, 1.0, 0.3, 1.0, 1000, Phaser.Easing.Quintic.Out);
+
+
+  	this.weaponBoss = this.game.add.weapon(10, 'laser');
+  	this.weaponBoss.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+  	this.weaponBoss.bulletSpeed = 400;
+  	this.weaponBoss.fireRate = 800;
+  	this.weaponBoss.fireAngle = 90;
+  	this.weaponBoss.bulletAngleVariance  = 40;
+  	this.game.physics.arcade.enable(this.weaponBoss);
+  	this.weaponBoss.trackSprite(this.boss, 0, 0, false);
+  	this.weaponBoss.bullets.forEach((b) => {
+  	  b.scale.setTo(0.5, 0.5);
+  	  b.body.updateBounds();
+  	}, this);
+  	this.weaponBoss.bulletAngleOffset = 90;
+  }
+
 
   // Life
   this.lives = this.game.add.group();
@@ -145,7 +233,7 @@ level1.create = function () {
   // Labels
   this.scoreLabel = this.game.add.text(50, 20, 'Score: 0/' + this.pointToNextLevel,
   	{ font: '22px Arial', fill: '#ffffff' });
-  this.levelLabel = this.game.add.text(this.game.world.centerX, 20, 'Level ' + this.currentLevel,
+  this.levelLabel = this.game.add.text(this.game.world.centerX, 20, 'Level ' + this.game.global.level,
   	{ font: '22px Arial', fill: '#ffffff' });
   this.bonusLabel = this.game.add.text(50, 50, 'Bonus Time: ',
   	{ font: '22px Arial', fill: '#ffffff' });
@@ -160,9 +248,9 @@ level1.create = function () {
   this.coinSound = this.game.add.audio('coin');
   this.laserSound = this.game.add.audio('laser');
 
-  this.level1Music = this.game.add.audio('level1');
-  this.level1Music.volume = 0.7;
-  this.level1Music.play();
+  this.backgroundMusic = this.game.add.audio('level1');
+  this.backgroundMusic.volume = 0.7;
+  this.backgroundMusic.play();
 
   // Keys
   this.spacebar = this.game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
@@ -175,7 +263,7 @@ level1.create = function () {
   cursors = this.game.input.keyboard.createCursorKeys();
 },
 
-level1.update = function () {
+game.update = function () {
 
 	this.background.tilePosition.y += 1;
 
@@ -187,11 +275,36 @@ level1.update = function () {
 		if(this.shield == null){
 			this.game.physics.arcade.overlap(this.player, this.meteors, this.playerDie,
 				null, this);
+
+			if(this.deployBoss){
+				this.game.physics.arcade.overlap(this.player, this.boss, this.playerDie,
+				  null, this);
+		 	}
 		}
+
+		// Boss overlap
+		if(this.deployBoss){
+			this.game.physics.arcade.overlap(this.weaponBoss.bullets, this.meteors, this.touchMeteor,
+			  null, this);
+			this.game.physics.arcade.overlap(this.player, this.weaponBoss.bullets, this.playerDie,
+			  null, this);
+			this.game.physics.arcade.overlap(this.weapon.bullets, this.boss, this.damageBoss,
+			  null, this);
+		}
+
+
+		this.game.physics.arcade.overlap(this.player, this.weaponEnemy.bullets, this.playerDie,
+			null, this);
+
+		this.game.physics.arcade.overlap(this.player, this.secondEnemies, this.playerDie,
+			null, this);
 		
 		this.game.physics.arcade.overlap(this.weapon.bullets, this.meteors, this.touchMeteor,
 			null, this);
 		this.game.physics.arcade.overlap(this.weapon.bullets, this.enemies, this.damageEnemy,
+			null, this);
+
+		this.game.physics.arcade.overlap(this.weapon.bullets, this.secondEnemies, this.damageEnemy,
 			null, this);
 
 		// Bonus collectables
@@ -199,7 +312,11 @@ level1.update = function () {
 			null, this);
 
 		if(this.friend.follow){
+			this.game.physics.arcade.overlap(this.weaponFriend.bullets, this.boss, this.damageBoss,
+			null, this);
 			this.game.physics.arcade.overlap(this.weaponFriend.bullets, this.enemies, this.damageEnemy,
+			null, this);
+			this.game.physics.arcade.overlap(this.weaponFriend.bullets, this.secondEnemies, this.damageEnemy,
 			null, this);
 			this.game.physics.arcade.overlap(this.weaponFriend.bullets, this.meteors, this.touchMeteor,
 				null, this);
@@ -223,6 +340,12 @@ level1.update = function () {
 			this.addEnemy();
 			this.nextEnemy = this.game.time.now + this.delayEnemy;
 		}	
+
+		// Second Ennemies spawn
+		if (this.nextSecondEnemy < this.game.time.now) {
+			this.addSecondEnemy();
+			this.nextSecondEnemy = this.game.time.now + this.delaySecondEnemy;
+		}
 	}
 	
 	// Player movement
@@ -251,12 +374,41 @@ level1.update = function () {
 	this.player.body.acceleration.y = 0;
   }
 
+  // Boss mouvement
+  if(this.deployBoss){
+
+	if(this.boss.y > 200){
+		this.boss.y = 200;
+
+		if(this.bossDirection == 'left'){
+		  this.boss.body.velocity.x = -60;
+		  if(this.boss.x < 200){
+		    this.bossDirection = 'right';
+		  }
+		}
+		else{
+		  this.boss.body.velocity.x = 60;
+		  if(this.boss.x > 700){
+		    this.bossDirection = 'left';
+		  }
+		}
+	}
+  	if(this.boss.alive){
+  	  this.weaponBoss.fire();
+  	}
+  }
+
+  
+
 	// Fire laser event
 	if(this.player.alive){
 		if (this.spacebar.isDown) {
 			if(this.playerBonus == 'missile'){
 				this.weapon.fireRate = 200;
-				if(this.enemies.getFirstAlive() != null){
+				if(this.secondEnemies.getFirstAlive() != null){
+					this.weapon.fireAtSprite(this.secondEnemies.getFirstAlive());
+				}
+				else if(this.enemies.getFirstAlive() != null){
 					this.weapon.fireAtSprite(this.enemies.getFirstAlive());
 				}
 				else{
@@ -287,6 +439,13 @@ level1.update = function () {
 		}
 	}
 
+	this.secondEnemies.forEach((enemy) => {
+		if(enemy.alive){
+			this.weaponEnemy.fireAngle = enemy.angle + 90;
+			this.weaponEnemy.fire(enemy);
+		}
+	}, this);
+
 	// Bonus timer
 	if(this.bonusTimer.visible){
 		if(this.bonusTimerSize > 0){
@@ -297,11 +456,23 @@ level1.update = function () {
 
 	// Shield
 	if(this.shield != null){
+
+		if(this.deployBoss){
+			this.game.physics.arcade.overlap(this.shield, this.weaponBoss.bullets, this.hitMeteor,
+			  null, this);	
+		}
+		
 		this.game.physics.arcade.overlap(this.shield, this.enemies, this.damageEnemy,
 			null, this);
+		this.game.physics.arcade.overlap(this.shield, this.secondEnemies, this.damageEnemy,
+					null, this);
 		this.game.physics.arcade.moveToObject(this.shield, this.player, 50, 50);
 	}
 
+	if(this.deployBoss){
+		this.bossLifeBar.x = this.boss.x;
+		this.bossLifeBar.y = this.boss.y - 100;	
+	}
 
 	  this.meteors.forEach((b) => {
 	  	b.rotation += 0.01;
@@ -310,18 +481,19 @@ level1.update = function () {
 
 }, // End update()
 
-level1.startMenu = function() {
-	this.level1Music.stop();
+game.startMenu = function() {
+	this.backgroundMusic.stop();
 	this.game.state.start('mainTitle');
 },
-level1.startNextLevel = function () {
-	this.level1Music.stop();
-	this.game.state.start('level' + (this.currentLevel + 1) );
+game.startNextLevel = function () {
+	this.backgroundMusic.stop();
+	this.game.global.level++;
+	this.game.state.start('game');
 },
-level1.resetPlayer = function() {
+game.resetPlayer = function() {
 	this.player.reset(this.game.width/2, this.game.world.centerY + 100);
 },
-level1.takeBonus = function(player, bonus) {
+game.takeBonus = function(player, bonus) {
 	this.coinSound.play();
 	this.playerBonus = bonus.key;
 	if(bonus.key == 'shield_bonus'){
@@ -349,13 +521,13 @@ level1.takeBonus = function(player, bonus) {
 	bonus.kill();
 	this.bonusDropped == false;
 },
-level1.addEnemy = function() {
+game.addEnemy = function() {
 	var enemy = this.enemies.getFirstDead();
 	if (!enemy) {
 		return;
 	}
 	enemy.anchor.setTo(0.5, 1);
-	enemy.healthPoint = this.enemyLife;
+	enemy.healthPoint = this.maxEnemyLife;
 	enemy.reset(this.game.rnd.pick([100, 200, 300, 400, 500, 600, 700]), 0);
 
 	enemy.children[0].scale.setTo(1, 1);
@@ -365,7 +537,23 @@ level1.addEnemy = function() {
 	enemy.checkWorldBounds = true;
 	enemy.outOfBoundsKill = true;
 },
-level1.playerDie = function() {
+game.addSecondEnemy = function() {
+	var enemy = this.secondEnemies.getFirstDead();
+	if (!enemy) {
+		return;
+	}
+	enemy.anchor.setTo(0.5, 1);
+	enemy.healthPoint = this.maxEnemyLife;
+	enemy.reset(this.game.rnd.pick([300, 400, 500, 600]), 0);
+
+	enemy.children[0].scale.setTo(1, 1);
+
+	enemy.rotation = this.game.physics.arcade.angleBetween(enemy, this.player) - 1.5;
+	this.game.physics.arcade.moveToObject(enemy, this.player, 200);
+	enemy.checkWorldBounds = true;
+	enemy.outOfBoundsKill = true;
+},
+game.playerDie = function() {
 
 	if(!this.player.invincible){
 
@@ -392,6 +580,7 @@ level1.playerDie = function() {
 			this.game.add.tween(this.finishLabel).to( { alpha: 1 }, 2500, "Linear", true);
 			this.game.time.slowMotion = 2.0;
 		    this.game.time.events.add(3000, this.startMenu, this);
+		    this.game.global.life = 3;
 		}
 
 		this.stopBonus();
@@ -400,7 +589,7 @@ level1.playerDie = function() {
 		this.game.time.events.add(2500, this.toggleInvincible, this);
 	}
 },
-level1.damageEnemy = function(sprite, enemy) {
+game.damageEnemy = function(sprite, enemy) {
 	enemyX = enemy.x;
 	enemyY = enemy.y;
 
@@ -447,7 +636,7 @@ level1.damageEnemy = function(sprite, enemy) {
 },
 
 // Meteors
-level1.addMeteor = function() {
+game.addMeteor = function() {
 	var meteor = this.meteors.getFirstDead();
 	if (!meteor) {
 		return;
@@ -480,7 +669,7 @@ level1.addMeteor = function() {
 	meteor.checkWorldBounds = true;
 	meteor.outOfBoundsKill = true;
 },
-level1.touchMeteor = function(laser, meteor) {
+game.touchMeteor = function(laser, meteor) {
 	laser.kill();
 
 	if(meteor.key == 'meteor_grey' || meteor.key == 'meteor_grey_med'){
@@ -511,7 +700,7 @@ level1.touchMeteor = function(laser, meteor) {
 	}
 },
 
-level1.stopBonus = function() {
+game.stopBonus = function() {
 	if(this.shield != null){
 		this.shield.kill();
 	}
@@ -526,13 +715,13 @@ level1.stopBonus = function() {
 	this.bonusTimerSize = 1;
 	this.playerBonus = '';
 },
-level1.toggleInvincible = function() {
+game.toggleInvincible = function() {
 	this.player.invincible = !this.player.invincible;
 	if(!this.player.invincible){
 		this.player.alpha = 1;
 	}
 },
-level1.increaseScore = function(score){
+game.increaseScore = function(score){
 	this.game.global.score += score;
 	this.scoreLabel.text = 'Score: ' + this.game.global.score + '/' + this.pointToNextLevel;
 	if(this.game.global.score >= this.pointToNextLevel){
@@ -542,10 +731,10 @@ level1.increaseScore = function(score){
 		this.game.time.events.add(4000, this.startNextLevel, this);
 	}
 },
-level1.removeTextPoint = function(text){
+game.removeTextPoint = function(text){
 	text.destroy();
 },
-level1.dropBonus = function(spriteX, spriteY){
+game.dropBonus = function(spriteX, spriteY){
 
 	if(spriteX > 80 && spriteX < 720 && spriteY > 80 && spriteY < 520){
 		number = this.game.rnd.pick([1, 2, 3 , 4, 5, 6, 7, 8, 9, 10]);
@@ -582,9 +771,51 @@ level1.dropBonus = function(spriteX, spriteY){
 		}
 	}
 },
-level1.resetBonus = function(sprite){
+game.resetBonus = function(sprite){
 	sprite.kill();
 	this.bonusDropped = false;
+},
+game.damageBoss = function(boss, laser) {
+  laser.kill();
+
+  this.boss.healthPoint -= 10;
+  this.bossLifeBar.scale.setTo( (this.boss.healthPoint / this.maxBossLife ) , 1); 
+
+  if(this.boss.healthPoint <= 0){
+    
+    this.finish = true;
+
+    this.bossDeath.x = boss.x;
+        this.bossDeath.y = boss.y;
+        this.bossDeath.start(false, 1000, 50, 20);
+
+    this.game.time.events.add(1000, function(){
+      var explosion = explosions.getFirstExists(false);
+      var beforeScaleX = explosions.scale.x;
+      var beforeScaleY = explosions.scale.y;
+      var beforeAlpha = explosions.alpha;
+      explosion.reset(boss.body.x + boss.body.halfWidth, boss.body.y + boss.body.halfHeight);
+      explosion.alpha = 0.4;
+      explosion.scale.x = 3;
+      explosion.scale.y = 3;
+      var animation = explosion.play('explosion', 30, false, true);
+      animation.onComplete.addOnce(function(){
+          explosion.scale.x = beforeScaleX;
+          explosion.scale.y = beforeScaleY;
+          explosion.alpha = beforeAlpha;
+      });
+
+      boss.kill();
+    });
+
+    this.game.add.tween(this.finishLabel).to( { alpha: 1 }, 2500, "Linear", true);
+    this.game.time.slowMotion = 2.0;
+    this.game.time.events.add(3000, this.finishGame, this);
+  }
+},
+game.finishGame = function () {
+  this.backgroundMusic.stop();
+  this.game.state.start('finish');
 }
 
-module.exports = level1;
+module.exports = game;
