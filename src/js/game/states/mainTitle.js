@@ -40,12 +40,20 @@ mainTitle.create = function () {
   this.startLabel.anchor.setTo(0.5, 0.5);
   this.startLabel.inputEnabled = true;
   this.startLabel.events.onInputDown.add(this.startLevel1, this);
+  this.startLabel.events.onInputOver.add(this.overText, this);
+  this.startLabel.events.onInputOut.add(this.outText, this);
 
   this.chooseShipLabel = this.game.add.text(this.game.world.centerX, 320, 'Choose Ship',
     { font: '40px Arial', fill: '#ffffff' });
   this.chooseShipLabel.anchor.setTo(0.5, 0.5);
   this.chooseShipLabel.inputEnabled = true;
   this.chooseShipLabel.events.onInputDown.add(this.chooseShip, this);
+  this.chooseShipLabel.events.onInputOver.add(this.overText, this);
+  this.chooseShipLabel.events.onInputOut.add(this.outText, this);
+
+  this.muteButton = this.game.add.button(20, 20, 'mute', this.toggleSound,
+  this);
+  this.muteButton.frame = this.game.sound.mute ? 1 : 2;
 
 },
 
@@ -62,11 +70,25 @@ mainTitle.update = function () {
 mainTitle.startLevel1 = function () {
   this.introMusic.stop();
 	this.game.state.start('level1');
-}
+},
 
 mainTitle.chooseShip = function () {
   this.introMusic.stop();
   this.game.state.start('choose');
-}
+},
+
+mainTitle.overText = function (sprite) {
+  sprite.scale.setTo(1.2, 1.2);
+},
+
+mainTitle.outText = function (sprite) {
+  sprite.scale.setTo(1, 1);
+},
+
+mainTitle.toggleSound = function() {
+  this.game.sound.mute = !this.game.sound.mute;
+  this.muteButton.frame = this.game.sound.mute ? 1 : 2;
+},
+
 
 module.exports = mainTitle;

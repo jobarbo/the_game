@@ -28,6 +28,7 @@ preloader.preload = function () {
   this.game.load.image('meteor_med', 'images/meteor/meteor_brown_med.png');
   this.game.load.image('meteor_grey', 'images/meteor/meteor_grey_big.png');
   this.game.load.image('meteor_grey_med', 'images/meteor/meteor_grey_big.png');
+  this.game.load.spritesheet('mute', 'images/muteButton.png', 28, 22);
 
   this.game.load.spritesheet('explosion', 'images/explode.png', 128, 128);
 
