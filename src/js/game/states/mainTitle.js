@@ -25,6 +25,15 @@ mainTitle.create = function () {
   background.anchor.setTo(0.5, 0.5);
   background.scale.setTo(3.4, 3.4);
 
+  // Add ship
+  this.ship = this.game.add.sprite(0, this.game.world.centerY + 160, this.game.global.ship);
+  this.ship.anchor.setTo(0.5, 0.5);
+  this.ship.scale.setTo(1, 1);
+  this.game.physics.arcade.enable(this.ship);
+  this.ship.body.velocity.x = 150;
+  this.ship.body.velocity.y = 50;
+  this.ship.angle = 110;
+
   // add Spacebar key
   this.keys = [Phaser.KeyCode.SPACEBAR];
   this.phaserKeys = this.game.input.keyboard.addKeys(this.keys);
@@ -57,15 +66,6 @@ mainTitle.create = function () {
   this.muteButton = this.game.add.button(20, 20, 'mute', this.toggleSound,
   this);
   this.muteButton.frame = this.game.sound.mute ? 1 : 2;
-
-  // Add ship
-  this.ship = this.game.add.sprite(0, this.game.world.centerY + 160, this.game.global.ship);
-  this.ship.anchor.setTo(0.5, 0.5);
-  this.ship.scale.setTo(1, 1);
-  this.game.physics.arcade.enable(this.ship);
-  this.ship.body.velocity.x = 150;
-  this.ship.body.velocity.y = 50;
-  this.ship.angle = 110;
 
 },
 
