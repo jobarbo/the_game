@@ -125,7 +125,7 @@ level1.create = function () {
 
   // Life
   this.lives = this.game.add.group();
-  this.lives.createMultiple(this.game.global.life, 'life');
+  this.lives.createMultiple(this.game.global.life, this.game.global.ship + '_life');
   for (i = 0; i < this.game.global.life ; i++) {
   	this.lives.children[i].x = this.game.width - (180 - (i * 40));
   	this.lives.children[i].y = 40;
@@ -335,7 +335,7 @@ level1.takeBonus = function(player, bonus) {
 	}
 
 	if(bonus.key == 'pill'){
-		bonusHeart = this.game.add.sprite( (this.lives.children[this.lives.length - 1].x + 40 ), 40, 'life');
+		bonusHeart = this.game.add.sprite( (this.lives.children[this.lives.length - 1].x + 40 ), 40, this.game.global.ship + '_life');
 		this.lives.add(bonusHeart);
 		this.game.global.life += 1;
 		this.stopBonus();

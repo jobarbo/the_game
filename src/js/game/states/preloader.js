@@ -8,7 +8,9 @@ preloader.preload = function () {
   this.game.load.image('ship2', 'images/player/ship2.png');
   this.game.load.image('ship3', 'images/player/ship3.png');
   this.game.load.image('friend', 'images/player/friend1.png');
-  this.game.load.image('life', 'images/player/life_green.png');
+  this.game.load.image('ship1_life', 'images/player/ship1_life.png');
+  this.game.load.image('ship2_life', 'images/player/ship2_life.png');
+  this.game.load.image('ship3_life', 'images/player/ship3_life.png');
   this.game.load.image('laser', 'images/laserr.png');
   this.game.load.image('laser_green', 'images/laserg.png');
   this.game.load.image('coin', 'images/collectables/coin/gold_1.png');
@@ -28,6 +30,7 @@ preloader.preload = function () {
   this.game.load.image('meteor_med', 'images/meteor/meteor_brown_med.png');
   this.game.load.image('meteor_grey', 'images/meteor/meteor_grey_big.png');
   this.game.load.image('meteor_grey_med', 'images/meteor/meteor_grey_big.png');
+  this.game.load.spritesheet('mute', 'images/muteButton.png', 28, 22);
 
   this.game.load.spritesheet('explosion', 'images/explode.png', 128, 128);
 
@@ -38,6 +41,9 @@ preloader.preload = function () {
   this.game.load.audio('level1', 'audio/level2.ogg');
   this.game.load.audio('level2', 'audio/level4.ogg');
   this.game.load.audio('pimp', 'audio/get_low.mp3');
+
+  //  Load the Google WebFont Loader script
+  //this.game.load.script('webfont', '//ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js');
 };
 
 preloader.create = function () {

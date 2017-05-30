@@ -40,7 +40,7 @@ level2.create = function () {
   
 
   // Add player
-  this.player = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY + 100, 'player');
+  this.player = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY + 100, this.game.global.ship);
   this.player.anchor.setTo(0.5, 0.5);
   this.player.scale.setTo(0.5,0.5);
   this.game.physics.arcade.enable(this.player);
@@ -154,7 +154,7 @@ level2.create = function () {
 
   // Life
   this.lives = this.game.add.group();
-  this.lives.createMultiple(this.game.global.life, 'life');
+  this.lives.createMultiple(this.game.global.life, this.game.global.ship + '_life');
   for (i = 0; i < this.game.global.life ; i++) {
   	this.lives.children[i].x = this.game.width - (180 - (i * 40));
   	this.lives.children[i].y = 40;

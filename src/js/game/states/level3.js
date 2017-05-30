@@ -43,7 +43,7 @@ level3.create = function () {
   
 
   // Add player
-  this.player = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY + 100, 'player');
+  this.player = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY + 100, this.game.global.ship);
   this.player.anchor.setTo(0.5, 0.5);
   this.player.scale.setTo(0.5,0.5);
   this.game.physics.arcade.enable(this.player);
@@ -155,7 +155,7 @@ level3.create = function () {
     this.weaponEnemy.bulletAngleOffset = 90;
 
       // Add Boss
-    this.boss = this.game.add.sprite(this.game.width/2, -50, 'boss');
+    this.boss = this.game.add.sprite(this.game.width/2, -100, 'boss');
     this.boss.anchor.setTo(0.5, 0.5);
     this.boss.scale.setTo(2,2);
     this.game.physics.arcade.enable(this.boss);
@@ -210,7 +210,7 @@ level3.create = function () {
 
   // Life
   this.lives = this.game.add.group();
-  this.lives.createMultiple(this.game.global.life, 'life');
+  this.lives.createMultiple(this.game.global.life, this.game.global.ship + '_life');
   for (i = 0; i < this.game.global.life ; i++) {
   	this.lives.children[i].x = this.game.width - (180 - (i * 40));
   	this.lives.children[i].y = 40;
@@ -488,7 +488,7 @@ level3.takeBonus = function(player, bonus) {
 	}
 
 	if(bonus.key == 'pill'){
-		bonusHeart = this.game.add.sprite( (this.lives.children[this.lives.length - 1].x + 40 ), 40, 'life');
+		bonusHeart = this.game.add.sprite( (this.lives.children[this.lives.length - 1].x + 40 ), 40, this.game.global.ship + '_life');
 		this.lives.add(bonusHeart);
 		this.game.global.life += 1;
 		this.stopBonus();
