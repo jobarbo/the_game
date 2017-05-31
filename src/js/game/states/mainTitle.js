@@ -19,6 +19,8 @@ WebFontConfig = {
 
 mainTitle.create = function () {
 	
+  this.delayMeteor = 5000;
+
   this.game.physics.startSystem(Phaser.Physics.P2JS);
 
   var background = this.game.add.sprite(this.game.world.centerX - 10, this.game.world.centerY, 'background');
@@ -55,6 +57,16 @@ mainTitle.create = function () {
   { font: '22px Arial', fill: '#ffffff', align: 'center' });
   scoreLabel.anchor.setTo(0.5, 0.5);*/
 
+  // Meteors
+  this.meteors = this.game.add.group();
+  this.meteors.createMultiple(3, 'meteor');
+  for (i = 0; i <this.meteors.length ; i++) {
+    this.meteors.children[i].scale.setTo(0.8,0.8);
+  }
+  this.meteors.enableBody = true;
+  this.game.physics.arcade.enable(this.meteors);
+  this.nextMeteor = 0;
+
   highscoreLabel.anchor.setTo(0.5, 0.5);
 
   this.introMusic = this.game.add.audio('intro');
@@ -65,7 +77,23 @@ mainTitle.create = function () {
 
   this.muteButton = this.game.add.button(20, 20, 'mute', this.toggleSound,
   this);
-  this.muteButton.frame = this.game.sound.mute ? 1 : 2;
+
+  
+  // Mute setting
+  if (!localStorage.getItem('mute')) {
+    localStorage.setItem('mute', false);
+    this.muteButton.frame = 2;
+  }
+  else{
+    if(localStorage.getItem('mute') == 'false'){
+      this.muteButton.frame = 2;
+      this.game.sound.mute = false;
+    }
+    else{
+      this.muteButton.frame = 1;
+      this.game.sound.mute = true;
+    }
+  }
 
 },
 
@@ -77,6 +105,16 @@ mainTitle.update = function () {
   		this.startLevel1();
   	}
   }
+
+  // Meteors spawn
+  if (this.nextMeteor < this.game.time.now) {
+    this.addMeteor();
+    this.nextMeteor = this.game.time.now + this.delayMeteor;
+  }
+
+  this.meteors.forEach((b) => {
+    b.rotation += 0.01;
+  }, this);
 
   this.game.world.wrap(this.ship, 0, true);
 
@@ -120,8 +158,42 @@ mainTitle.outText = function (sprite) {
 
 mainTitle.toggleSound = function() {
   this.game.sound.mute = !this.game.sound.mute;
+  localStorage.setItem('mute', this.game.sound.mute);
   this.muteButton.frame = this.game.sound.mute ? 1 : 2;
 },
+// Meteors
+mainTitle.addMeteor = function() {
+  var meteor = this.meteors.getFirstDead();
+  if (!meteor) {
+    return;
+  }
+  var key = this.game.rnd.pick(['meteor_grey_med', 'meteor_grey', 'meteor_med', 'meteor']);
+  var angle = this.game.rnd.pick([0,20,40,60,80,100]);
+  meteor.key = key;
+  meteor.loadTexture(key, 0);
+  meteor.anchor.setTo(0.5, 0.5);
+  meteor.angle = angle;
+  if(key == 'meteor_grey_med' || key == 'meteor_med'){
+    meteor.healthPoint = 2;
+  }
+  else{
+    meteor.healthPoint = 3;
+  }
 
+  var direction = this.game.rnd.pick(['horizontal', 'vertical']); 
+  if(direction == 'vertical'){
+    meteor.reset(this.game.rnd.pick([200, 300, 400, 500, 600]), 0);
+    meteor.body.velocity.y = this.game.rnd.pick([100, 150]);
+    meteor.body.velocity.x = this.game.rnd.pick([0, 50, 100]) * this.game.rnd.pick([-1, 1]);
+  }
+  else{
+    meteor.reset(0, this.game.rnd.pick([200, 300, 400]));
+    meteor.body.velocity.y = this.game.rnd.pick([25, 50, 75]) * this.game.rnd.pick([-1, 1]);
+    meteor.body.velocity.x = this.game.rnd.pick([100, 150]);
+  }
+  
+  meteor.checkWorldBounds = true;
+  meteor.outOfBoundsKill = true;
+},
 
 module.exports = mainTitle;
