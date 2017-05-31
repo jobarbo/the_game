@@ -598,6 +598,7 @@ game.playerDie = function() {
 			this.game.time.slowMotion = 2.0;
 		    this.game.time.events.add(3000, this.startMenu, this);
 		    this.game.global.life = 3;
+		    this.game.global.level = 1;
 		}
 
 		this.stopBonus();
@@ -827,7 +828,8 @@ game.damageBoss = function(boss, laser) {
 
     this.game.add.tween(this.finishLabel).to( { alpha: 1 }, 2500, "Linear", true);
     this.game.time.slowMotion = 2.0;
-    this.game.time.events.add(3000, this.finishGame, this);
+    this.game.time.events.add(4000, this.startNextLevel, this);
+    //this.game.time.events.add(3000, this.finishGame, this);
   }
 },
 game.finishGame = function () {

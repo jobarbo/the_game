@@ -102,7 +102,7 @@ mainTitle.update = function () {
   for (var index in this.phaserKeys) {
   	var key = this.phaserKeys[index];
   	if (key.justDown) {
-  		this.startLevel1();
+  		this.startGame();
   	}
   }
 
@@ -125,7 +125,7 @@ mainTitle.createText = function () {
     { font: '40px Arial', fill: '#ffffff' });
   this.startLabel.anchor.setTo(0.5, 0.5);
   this.startLabel.inputEnabled = true;
-  this.startLabel.events.onInputDown.add(this.startLevel1, this);
+  this.startLabel.events.onInputDown.add(this.startGame, this);
   this.startLabel.events.onInputOver.add(this.overText, this);
   this.startLabel.events.onInputOut.add(this.outText, this);
 
@@ -138,7 +138,7 @@ mainTitle.createText = function () {
   this.chooseShipLabel.events.onInputOut.add(this.outText, this);
 },
 
-mainTitle.startLevel1 = function () {
+mainTitle.startGame = function () {
   this.introMusic.stop();
 	this.game.state.start('game');
 },
