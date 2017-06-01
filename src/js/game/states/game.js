@@ -859,7 +859,7 @@ game.damageBoss = function(boss, laser) {
   		localStorage.setItem('ship2Unlock', true);
   		shipToUnlock = 'ship3';
 	}
-	else {
+	else if (localStorage.getItem('ship1Unlock') != 'true'){
 		localStorage.setItem('ship1Unlock', true);
 		shipToUnlock = 'ship2';
 	}
@@ -884,7 +884,7 @@ game.damageBoss = function(boss, laser) {
         this.bossDeath.y = boss.y;
         this.bossDeath.start(false, 1000, 50, 20);
 
-    this.game.time.events.add(1000, function(){
+    //this.game.time.events.add(1000, function(){
       var explosion = this.explosions.getFirstExists(false);
       var beforeScaleX = this.explosions.scale.x;
       var beforeScaleY = this.explosions.scale.y;
@@ -901,7 +901,7 @@ game.damageBoss = function(boss, laser) {
       });
 
       boss.kill();
-    });
+    //});
 
     this.game.add.tween(this.finishLabel).to( { alpha: 1 }, 2500, "Linear", true);
     this.game.time.slowMotion = 2.0;
