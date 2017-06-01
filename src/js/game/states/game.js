@@ -192,17 +192,6 @@ game.create = function () {
   	this.bossLifeBar = this.game.add.sprite(this.boss.x, this.boss.y, bmdBoss);
   	this.bossLifeBar.anchor.setTo(0.5, 0.5);
 
-  	  //  An explosion pool
-  	explosions = this.game.add.group();
-  	explosions.enableBody = true;
-  	explosions.physicsBodyType = Phaser.Physics.ARCADE;
-  	explosions.createMultiple(30, 'explosion');
-  	explosions.setAll('anchor.x', 0.5);
-  	explosions.setAll('anchor.y', 0.5);
-  	explosions.forEach( function(explosion) {
-  	    explosion.animations.add('explosion');
-  	});
-
   	//  Big explosion for boss
   	this.bossDeath = this.game.add.emitter(this.boss.x, this.boss.y);
   	this.bossDeath.width = this.boss.width / 2;
@@ -226,6 +215,17 @@ game.create = function () {
   	}, this);
   	this.weaponBoss.bulletAngleOffset = 90;
   }
+
+    //  An explosion pool
+  this.explosions = this.game.add.group();
+  this.explosions.enableBody = true;
+  this.explosions.physicsBodyType = Phaser.Physics.ARCADE;
+  this.explosions.createMultiple(30, 'explosion');
+  this.explosions.setAll('anchor.x', 0.5);
+  this.explosions.setAll('anchor.y', 0.5);
+  this.explosions.forEach( function(explosion) {
+      explosion.animations.add('explosion');
+  });
 
 
   // Life
@@ -636,10 +636,12 @@ game.damageEnemy = function(sprite, enemy) {
 
 	enemy.healthPoint -= 10;
 
+	enemy.tint = '0xff0000';
+    this.game.time.events.add(100, this.resetTint, this, enemy);
+
 	enemy.children[0].scale.setTo( (enemy.healthPoint / this.maxEnemyLife ) , 1);	
 
 	if(enemy.healthPoint <= 0){
-		enemy.kill();
 
 		var pointForKill = this.pointPerEnemy;
 		if(enemy.key == 'second_enemy'){
@@ -660,11 +662,31 @@ game.damageEnemy = function(sprite, enemy) {
 
 		this.increaseScore(pointForKill);
 
-		this.emitter.x = enemyX;
+	  var explosion = this.explosions.getFirstExists(false);
+	  var beforeScaleX = this.explosions.scale.x;
+	  var beforeScaleY = this.explosions.scale.y;
+	  var beforeAlpha = this.explosions.alpha;
+	  explosion.reset(enemy.body.x + enemy.body.halfWidth, enemy.body.y + enemy.body.halfHeight);
+	  explosion.alpha = 0.4;
+	  explosion.scale.x = 1;
+	  explosion.scale.y = 1;
+	  var animation = explosion.play('explosion', 30, false, true);
+	  animation.onComplete.addOnce(function(){
+	      explosion.scale.x = beforeScaleX;
+	      explosion.scale.y = beforeScaleY;
+	      explosion.alpha = beforeAlpha;
+	  });
+
+	  enemy.kill();
+
+		/*this.emitter.x = enemyX;
 		this.emitter.y = enemyY;
 		this.emitter.setScale(2, 0, 2, 0, 800);
-		this.emitter.start(true, 800, null, 15);
+		this.emitter.start(true, 800, null, 15);*/
 	}
+},
+game.resetTint = function(sprite){
+	sprite.tint = '0xffffff';
 },
 
 // Meteors
@@ -826,6 +848,10 @@ game.damageBoss = function(boss, laser) {
   this.boss.healthPoint -= 10;
   this.bossLifeBar.scale.setTo( (this.boss.healthPoint / this.maxBossLife ) , 1); 
 
+  // Not sure ..
+  //this.boss.tint = '0xff0000';
+  //this.game.time.events.add(100, this.resetTint, this, this.boss);
+
   if(this.boss.healthPoint <= 0){
 
   	var shipToUnlock = '';
@@ -859,10 +885,10 @@ game.damageBoss = function(boss, laser) {
         this.bossDeath.start(false, 1000, 50, 20);
 
     this.game.time.events.add(1000, function(){
-      var explosion = explosions.getFirstExists(false);
-      var beforeScaleX = explosions.scale.x;
-      var beforeScaleY = explosions.scale.y;
-      var beforeAlpha = explosions.alpha;
+      var explosion = this.explosions.getFirstExists(false);
+      var beforeScaleX = this.explosions.scale.x;
+      var beforeScaleY = this.explosions.scale.y;
+      var beforeAlpha = this.explosions.alpha;
       explosion.reset(boss.body.x + boss.body.halfWidth, boss.body.y + boss.body.halfHeight);
       explosion.alpha = 0.4;
       explosion.scale.x = 3;
