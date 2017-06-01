@@ -24,14 +24,23 @@ game.create = function () {
   	this.deploySecondEnemy = true;
   }
   
-  this.pointToNextLevel = 100;
-  this.maxEnemyLife = 10 + (this.game.global.level * 10);
-  this.delayMeteor = 4000 / (this.game.global.level/1.5);
-  this.delayEnemy = 2500 / (this.game.global.level/1.5);
-  this.delaySecondEnemy = 5000 / (this.game.global.level/1.5);
+  if(this.game.global.level == 1 && this.game.global.ship == 'ship2'){
+  	this.game.global.life = 4;
+  }
 
-  this.bossLife = 500;
+  this.pointToNextLevel = 100;
+  this.maxEnemyLife = 10;
+  if(this.game.global.level < 3){
+  	this.maxEnemyLife = 10 + (this.game.global.level * 10);
+  }
+  this.delayMeteor = 4000 - (this.game.global.level * 100);
+  this.delayEnemy = 2500 - (this.game.global.level * 100);
+  this.delaySecondEnemy = 5000 - (this.game.global.level * 100);
+
   this.maxBossLife = 500;
+  if(this.game.global.level < 15){
+  	this.maxBossLife = 500 + (this.game.global.level * 20);
+  }
   this.bossDirection = 'left';
 
   // Background
@@ -172,7 +181,7 @@ game.create = function () {
   	this.boss.scale.setTo(2,2);
   	this.game.physics.arcade.enable(this.boss);
   	this.boss.body.velocity.y = 50;
-  	this.boss.healthPoint = this.bossLife;
+  	this.boss.healthPoint = this.maxBossLife;
 
   	// Boss lifebar
   	var bmdBoss = this.game.add.bitmapData(200, 8);
@@ -223,8 +232,8 @@ game.create = function () {
   this.lives = this.game.add.group();
   this.lives.createMultiple(this.game.global.life, this.game.global.ship + '_life');
   for (i = 0; i < this.game.global.life ; i++) {
-  	this.lives.children[i].x = this.game.width - (180 - (i * 40));
-  	this.lives.children[i].y = 40;
+  	this.lives.children[i].x = this.game.width - (220 - (i * 40));
+  	this.lives.children[i].y = 20;
   	this.lives.children[i].visible = true;
   }
 
@@ -473,7 +482,12 @@ game.update = function () {
 	if(this.shield != null){
 
 		if(this.deployBoss){
-			this.game.physics.arcade.overlap(this.shield, this.weaponBoss.bullets, this.hitMeteor,
+			this.game.physics.arcade.overlap(this.shield, this.weaponBoss.bullets, this.destroyBullet,
+			  null, this);	
+		}
+
+		if(this.deploySecondEnemy){
+			this.game.physics.arcade.overlap(this.shield, this.weaponEnemy.bullets, this.destroyBullet,
 			  null, this);	
 		}
 		
@@ -524,7 +538,7 @@ game.takeBonus = function(player, bonus) {
 	}
 
 	if(bonus.key == 'pill'){
-		bonusHeart = this.game.add.sprite( (this.lives.children[this.lives.length - 1].x + 40 ), 40, this.game.global.ship + '_life');
+		bonusHeart = this.game.add.sprite( (this.lives.children[this.lives.length - 1].x + 40 ), 20, this.game.global.ship + '_life');
 		this.lives.add(bonusHeart);
 		this.game.global.life += 1;
 		this.stopBonus();
@@ -742,7 +756,7 @@ game.toggleInvincible = function() {
 game.increaseScore = function(score){
 	this.game.global.score += score;
 	this.scoreLabel.text = 'Score: ' + this.game.global.score + '/' + this.pointToNextLevel;
-	if(this.game.global.score >= this.pointToNextLevel){
+	if(this.game.global.score >= this.pointToNextLevel && this.game.global.level % 3 != 0){
 		this.finish = true;
 		this.game.add.tween(this.finishLabel).to( { alpha: 1 }, 2500, "Linear", true);
 		this.game.time.slowMotion = 2.0;
@@ -768,13 +782,21 @@ game.dropBonus = function(spriteX, spriteY){
 				bonusKey = 'friend_bonus';
 				break;
 			case 2 :
-				bonusKey = 'missile';
+				if(this.game.global.level % 3 != 0){
+					bonusKey = 'missile';
+				}
 				break;
 			case 1 :
 			case 6 :
-				if(this.game.global.life < 4){
+			case 7 :
+			case 8 :
+				if(this.game.global.ship == 'ship2' && this.game.global.life < 5){
 					bonusKey = 'pill';
 				}
+				else if(this.game.global.life < 4){
+					bonusKey = 'pill';
+				}
+				
 				break;
 		}
 		if(bonusKey != ''){
@@ -800,6 +822,30 @@ game.damageBoss = function(boss, laser) {
   this.bossLifeBar.scale.setTo( (this.boss.healthPoint / this.maxBossLife ) , 1); 
 
   if(this.boss.healthPoint <= 0){
+
+  	var shipToUnlock = '';
+  	if(localStorage.getItem('ship1Unlock') == 'true' && localStorage.getItem('ship2Unlock') != 'true'){
+  		localStorage.setItem('ship2Unlock', true);
+  		shipToUnlock = 'ship3';
+	}
+	else {
+		localStorage.setItem('ship1Unlock', true);
+		shipToUnlock = 'ship2';
+	}
+	if(shipToUnlock){
+		this.newShipLabel = this.game.add.text(this.game.world.centerX + 20, this.game.world.centerY - 200, 'New ship unlocked !',
+			{ font: '30px Arial', fill: '#ffffff' });
+		this.newShipLabel.anchor.setTo(0.5,0.5);
+		this.newShipLabel.alpha = 0;
+
+		this.newShip = this.game.add.sprite(this.game.world.centerX - 150, this.game.world.centerY - 200, shipToUnlock + '_life');
+		this.newShip.anchor.setTo(0.5, 0.5);
+		this.newShip.alpha = 0;
+
+		this.game.add.tween(this.newShip).to( { alpha: 1 }, 2000, "Linear", true);
+		this.game.add.tween(this.newShipLabel).to( { alpha: 1 }, 2000, "Linear", true);
+		this.game.time.events.add(3000, this.fadeOutUnlock, this);
+	}
     
     this.finish = true;
 
@@ -835,6 +881,15 @@ game.damageBoss = function(boss, laser) {
 game.finishGame = function () {
   this.backgroundMusic.stop();
   this.game.state.start('finish');
+},
+
+game.destroyBullet = function (sprite, bullet) {
+  bullet.kill();
+},
+
+game.fadeOutUnlock = function () {
+	this.game.add.tween(this.newShip).to( { alpha: 0 }, 1000, "Linear", true);
+	this.game.add.tween(this.newShipLabel).to( { alpha: 0 }, 1000, "Linear", true);
 }
 
 module.exports = game;

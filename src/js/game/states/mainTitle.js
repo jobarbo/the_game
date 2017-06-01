@@ -18,6 +18,9 @@ WebFontConfig = {
 };*/
 
 mainTitle.create = function () {
+
+  //localStorage.setItem('ship1Unlock', false);
+  //localStorage.setItem('ship2Unlock', false);
 	
   this.delayMeteor = 5000;
 

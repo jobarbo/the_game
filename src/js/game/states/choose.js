@@ -21,24 +21,41 @@ choose.create = function () {
   this.player.scale.setTo(1.6, 1.6);
   this.player.inputEnabled = true;
   this.player.events.onInputDown.add(this.selectShip, this);
-  this.player.events.onInputOver.add(this.changeTint, this);
-  this.player.events.onInputOut.add(this.removeTint, this);
+  this.player.events.onInputOver.add(this.overShip, this);
+  this.player.events.onInputOut.add(this.outShip, this);
 
   this.player2 = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY + 50, 'ship2');
   this.player2.anchor.setTo(0.5, 0.5);
   this.player2.scale.setTo(1.6, 1.6);
   this.player2.inputEnabled = true;
-  this.player2.events.onInputDown.add(this.selectShip, this);
-  this.player2.events.onInputOver.add(this.changeTint, this);
-  this.player2.events.onInputOut.add(this.removeTint, this);
+
+  if (localStorage.getItem('ship1Unlock') == 'true') {
+    this.player2.events.onInputDown.add(this.selectShip, this);
+    this.player2.events.onInputOver.add(this.overShip, this);
+    this.player2.events.onInputOut.add(this.outShip, this);  
+  }
+  else{
+    this.player2.tint = '#000000';
+    this.player2.events.onInputOver.add(this.displayText, this);
+    this.player2.events.onInputOut.add(this.removeText, this);
+  }
+  
 
   this.player3 = this.game.add.sprite(this.game.world.centerX + 200, this.game.world.centerY + 50, 'ship3');
   this.player3.anchor.setTo(0.5, 0.5);
   this.player3.scale.setTo(1.6, 1.6);
   this.player3.inputEnabled = true;
-  this.player3.events.onInputDown.add(this.selectShip, this);
-  this.player3.events.onInputOver.add(this.changeTint, this);
-  this.player3.events.onInputOut.add(this.removeTint, this);
+
+  if (localStorage.getItem('ship2Unlock') == 'true') {
+    this.player3.events.onInputDown.add(this.selectShip, this);
+    this.player3.events.onInputOver.add(this.overShip, this);
+    this.player3.events.onInputOut.add(this.outShip, this);
+  }
+  else{
+    this.player3.tint = '#000000';
+    this.player3.events.onInputOver.add(this.displayText, this);
+    this.player3.events.onInputOut.add(this.removeText, this);
+  }
   
   this.muteButton = this.game.add.button(20, 20, 'mute', this.toggleSound,
   this);
@@ -66,12 +83,47 @@ choose.selectShip = function (sprite) {
   this.goBack();
 },
 
-choose.changeTint = function (sprite) {
+choose.overShip = function (sprite) {
   sprite.scale.setTo(1.9, 1.9);
+
+  var text = '';
+  switch(sprite.key){
+    case 'ship1': 
+      text = 'Basic stuff, very boring';
+      break;
+    case 'ship2': 
+      text = 'More health, no more excuse';
+      break;
+    case 'ship3': 
+      text = 'Need speed ? take this';
+      break;
+  }
+
+  this.statsLabel = this.game.add.text(sprite.x, sprite.y - 80, text,
+    { font: '20px Arial', fill: '#ffffff' });
+  this.statsLabel.anchor.setTo(0.5, 0.5);
 },
 
-choose.removeTint = function (sprite) {
+choose.outShip = function (sprite) {
   sprite.scale.setTo(1.6, 1.6);
+  this.statsLabel.destroy();
+},
+
+choose.displayText = function (sprite) {
+  if(sprite.key == 'ship3'){
+    this.unlockLabel = this.game.add.text(this.player3.x, this.player3.y - 50, 'Unlock at level 5',
+      { font: '20px Arial', fill: '#ffffff' });
+  }
+  else{
+    this.unlockLabel = this.game.add.text(this.player2.x, this.player2.y - 50, 'Unlock at level 3',
+      { font: '20px Arial', fill: '#ffffff' });  
+  }
+  
+  this.unlockLabel.anchor.setTo(0.5, 0.5);
+},
+
+choose.removeText = function (sprite) {
+  this.unlockLabel.destroy();
 },
 
 choose.toggleSound = function() {

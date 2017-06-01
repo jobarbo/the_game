@@ -18,7 +18,7 @@ game.global = {
 	score: 0,
 	life: 3,
   level: 1,
-  ship: 'ship1'
+  ship: 'ship1',
 };
 
 
