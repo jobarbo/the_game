@@ -807,13 +807,18 @@ game.dropBonus = function(spriteX, spriteY){
 			bonusSprite.scale.setTo(0.8, 0.8);
 		    this.bonuses.add(bonusSprite);
 
-			this.game.time.events.add(8000, this.resetBonus, this, bonusSprite);
+		    this.game.time.events.add(6500, this.flashBonus, this, bonusSprite);
+			this.game.time.events.add(10000, this.resetBonus, this, bonusSprite);
 		}
 	}
 },
 game.resetBonus = function(sprite){
 	sprite.kill();
 	this.bonusDropped = false;
+},
+game.flashBonus = function(sprite){
+	var tween = game.add.tween(sprite).to( { alpha: 0 }, 200, "Linear", true);
+    tween.repeat(10, 200);
 },
 game.damageBoss = function(boss, laser) {
   laser.kill();
