@@ -6,7 +6,6 @@ game.create = function () {
   this.game.time.slowMotion = 1.0;
 
   this.playerBonus = '';
-  this.bonusTimerSize = 1;
   this.shield = null;
   this.bonusDropped = false;
   this.nextShotAt = 0;
@@ -29,8 +28,8 @@ game.create = function () {
   }
 
   this.pointToNextLevel = 100;
-  this.maxEnemyLife = 10;
-  if(this.game.global.level < 3){
+  this.maxEnemyLife = 20;
+  if(this.game.global.level % 3 != 0){
   	this.maxEnemyLife = 10 + (this.game.global.level * 10);
   }
   this.delayMeteor = 4000 - (this.game.global.level * 100);
@@ -243,18 +242,16 @@ game.create = function () {
   bmd.ctx.rect(0, 0, 100, 8);
   bmd.ctx.fillStyle = '#ffffff';
   bmd.ctx.fill();
-  this.bonusTimer = this.game.add.sprite(230, 63, bmd);
+  this.bonusTimer = this.game.add.sprite(228, this.game.world.height + 50, bmd);
   this.bonusTimer.anchor.setTo(0.5, 0.5);
-  this.bonusTimer.visible = false;
 
   // Labels
   this.scoreLabel = this.game.add.text(50, 20, 'Score: 0/' + this.pointToNextLevel,
   	{ font: '22px Arial', fill: '#ffffff' });
   this.levelLabel = this.game.add.text(this.game.world.centerX, 20, 'Level ' + this.game.global.level,
   	{ font: '22px Arial', fill: '#ffffff' });
-  this.bonusLabel = this.game.add.text(50, 50, 'Bonus Time: ',
+  this.bonusLabel = this.game.add.text(50, this.game.world.height + 50, 'Bonus Time: ',
   	{ font: '22px Arial', fill: '#ffffff' });
-  this.bonusLabel.visible = false;
 
   this.finishLabel = this.game.add.text(this.game.world.centerX, this.game.world.centerY, 'YOU WIN',
   	{ font: '40px Arial', fill: '#ffffff' });
@@ -470,14 +467,6 @@ game.update = function () {
 		}, this);	
 	}
 
-	// Bonus timer
-	if(this.bonusTimer.visible){
-		if(this.bonusTimerSize > 0){
-			this.bonusTimerSize -= 0.00165;
-			this.bonusTimer.scale.setTo(this.bonusTimerSize,1);	
-		}
-	}
-
 	// Shield
 	if(this.shield != null){
 
@@ -544,8 +533,10 @@ game.takeBonus = function(player, bonus) {
 		this.stopBonus();
 	}
 	else{
-		this.bonusTimer.visible = true;
-		this.bonusLabel.visible = true;
+		this.add.tween(this.bonusTimer.scale).to({ x: 0, y: 1} , 10000, "Linear", true);
+		this.game.add.tween(this.bonusLabel).to( { y: 530 }, 1000, "Linear", true);
+		this.game.add.tween(this.bonusTimer).to( { y: 543 }, 1000, "Linear", true);
+
 		this.game.time.events.add(10000, this.stopBonus, this);
 	}
 
@@ -636,7 +627,7 @@ game.damageEnemy = function(sprite, enemy) {
 
 	enemy.healthPoint -= 10;
 
-	enemy.tint = '0xff0000';
+	enemy.tint = '0xff5c5c';
     this.game.time.events.add(100, this.resetTint, this, enemy);
 
 	enemy.children[0].scale.setTo( (enemy.healthPoint / this.maxEnemyLife ) , 1);	
@@ -763,11 +754,14 @@ game.stopBonus = function() {
 		this.friend.follow = false;
 	}
 
-	this.bonusTimer.visible = false;
-	this.bonusLabel.visible = false;
-	this.bonusTimer.scale.setTo(1,1);
-	this.bonusTimerSize = 1;
+	this.game.add.tween(this.bonusLabel).to( { y: this.game.world.height+50 }, 500, "Linear", true);
+	this.game.add.tween(this.bonusTimer).to( { y: this.game.world.height+50 }, 500, "Linear", true);
+
+	this.game.time.events.add(1000, this.resetTimer, this);
 	this.playerBonus = '';
+},
+game.resetTimer = function() {
+	this.bonusTimer.scale.setTo(1,1);
 },
 game.toggleInvincible = function() {
 	this.player.invincible = !this.player.invincible;
@@ -829,6 +823,9 @@ game.dropBonus = function(spriteX, spriteY){
 			bonusSprite.scale.setTo(0.8, 0.8);
 		    this.bonuses.add(bonusSprite);
 
+	    	var tween = game.add.tween(bonusSprite.scale).to( { x: 1.05, y: 1.05 }, 500, "Linear", true);
+	        tween.repeat(15, 500);
+
 		    this.game.time.events.add(6500, this.flashBonus, this, bonusSprite);
 			this.game.time.events.add(10000, this.resetBonus, this, bonusSprite);
 		}
@@ -849,8 +846,8 @@ game.damageBoss = function(boss, laser) {
   this.bossLifeBar.scale.setTo( (this.boss.healthPoint / this.maxBossLife ) , 1); 
 
   // Not sure ..
-  //this.boss.tint = '0xff0000';
-  //this.game.time.events.add(100, this.resetTint, this, this.boss);
+  this.boss.tint = '0xff5c5c';
+  this.game.time.events.add(200, this.resetTint, this, this.boss);
 
   if(this.boss.healthPoint <= 0){
 

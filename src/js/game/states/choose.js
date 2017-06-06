@@ -2,9 +2,9 @@ var choose = {};
 
 choose.create = function () {
 
-  var background = this.game.add.sprite(this.game.world.centerX - 10, this.game.world.centerY, 'background');
-  background.anchor.setTo(0.5, 0.5);
-  background.scale.setTo(3.4, 3.4);
+  this.background = this.game.add.tileSprite(this.game.world.centerX - 10, this.game.world.centerY, 800, 600, 'background');
+  this.background.anchor.setTo(0.5, 0.5);
+  this.background.scale.setTo(3.4, 3.4);
 
   this.pimpMusic = this.game.add.audio('pimp');
   this.pimpMusic.volume = 0.7;
@@ -64,6 +64,8 @@ choose.create = function () {
 },
 
 choose.update = function () {
+  this.background.tilePosition.y += 1;
+  
   // Fire laser event
   for (var index in this.phaserKeys) {
 	var key = this.phaserKeys[index];
