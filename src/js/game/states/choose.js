@@ -10,7 +10,7 @@ choose.create = function () {
   this.pimpMusic.volume = 0.7;
   this.pimpMusic.play();
 
-  this.chooseShipLabel = this.game.add.text(this.game.world.centerX, 180, 'Choose Ship',
+  this.chooseShipLabel = this.game.add.text(this.game.world.centerX, 180, 'Choisi ton vaisseau',
     { font: '60px Arial', fill: '#ffffff' });
   this.chooseShipLabel.anchor.setTo(0.5, 0.5);
 
@@ -91,13 +91,13 @@ choose.overShip = function (sprite) {
   var text = '';
   switch(sprite.key){
     case 'ship1': 
-      text = 'Basic stuff, very boring';
+      text = 'Très simple, ben plate';
       break;
     case 'ship2': 
-      text = 'More health, no more excuse';
+      text = 'Plus de vie, aucune excuse !';
       break;
     case 'ship3': 
-      text = 'Need speed ? take this';
+      text = 'Besoin de vitesse ?';
       break;
   }
 
@@ -113,11 +113,11 @@ choose.outShip = function (sprite) {
 
 choose.displayText = function (sprite) {
   if(sprite.key == 'ship3'){
-    this.unlockLabel = this.game.add.text(this.player3.x, this.player3.y - 50, 'Unlock at level 5',
+    this.unlockLabel = this.game.add.text(this.player3.x, this.player3.y - 50, 'Débloque au niveau 5',
       { font: '20px Arial', fill: '#ffffff' });
   }
   else{
-    this.unlockLabel = this.game.add.text(this.player2.x, this.player2.y - 50, 'Unlock at level 3',
+    this.unlockLabel = this.game.add.text(this.player2.x, this.player2.y - 50, 'Débloque au niveau 3',
       { font: '20px Arial', fill: '#ffffff' });  
   }
   

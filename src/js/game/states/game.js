@@ -254,12 +254,12 @@ game.create = function () {
   // Labels
   this.scoreLabel = this.game.add.text(50, 20, 'Score: 0/' + this.pointToNextLevel,
   	{ font: '22px Arial', fill: '#ffffff' });
-  this.levelLabel = this.game.add.text(this.game.world.centerX, 20, 'Level ' + this.game.global.level,
+  this.levelLabel = this.game.add.text(this.game.world.centerX - 30, 20, 'Niveau ' + this.game.global.level,
   	{ font: '22px Arial', fill: '#ffffff' });
-  this.bonusLabel = this.game.add.text(50, this.game.world.height + 50, 'Bonus Time: ',
+  this.bonusLabel = this.game.add.text(40, this.game.world.height + 50, 'Temps bonus: ',
   	{ font: '22px Arial', fill: '#ffffff' });
 
-  this.finishLabel = this.game.add.text(this.game.world.centerX, this.game.world.centerY, 'YOU WIN',
+  this.finishLabel = this.game.add.text(this.game.world.centerX, this.game.world.centerY, 'TERMINÉ',
   	{ font: '40px Arial', fill: '#ffffff' });
   this.finishLabel.anchor.setTo(0.5,0.5);
   this.finishLabel.alpha = 0;
@@ -607,7 +607,7 @@ game.playerDie = function() {
 			this.game.time.events.add(1000, this.resetPlayer, this);
 		}
 		else{
-			this.finishLabel.text = 'YOU LOSE';
+			this.finishLabel.text = 'VOUS AVEZ PERDU';
 			this.finish = true;
 			this.game.add.tween(this.finishLabel).to( { alpha: 1 }, 2500, "Linear", true);
 			this.game.time.slowMotion = 2.0;
@@ -871,7 +871,7 @@ game.damageBoss = function(boss, laser) {
 		shipToUnlock = 'ship2';
 	}
 	if(shipToUnlock){
-		this.newShipLabel = this.game.add.text(this.game.world.centerX + 20, this.game.world.centerY - 200, 'New ship unlocked !',
+		this.newShipLabel = this.game.add.text(this.game.world.centerX + 20, this.game.world.centerY - 200, 'Nouveau vaisseau débloqué !',
 			{ font: '30px Arial', fill: '#ffffff' });
 		this.newShipLabel.anchor.setTo(0.5,0.5);
 		this.newShipLabel.alpha = 0;
