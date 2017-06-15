@@ -128,7 +128,7 @@ mainTitle.createText = function () {
     { font: '40px Arial', fill: '#ffffff' });
   this.startLabel.anchor.setTo(0.5, 0.5);
   this.startLabel.inputEnabled = true;
-  this.startLabel.events.onInputDown.add(this.startGame, this);
+  this.startLabel.events.onInputDown.add(this.changeState,{state: 'game', introMusic: this.introMusic, game: this.game});
   this.startLabel.events.onInputOver.add(this.overText, this);
   this.startLabel.events.onInputOut.add(this.outText, this);
 
@@ -136,19 +136,28 @@ mainTitle.createText = function () {
     { font: '40px Arial', fill: '#ffffff' });
   this.chooseShipLabel.anchor.setTo(0.5, 0.5);
   this.chooseShipLabel.inputEnabled = true;
-  this.chooseShipLabel.events.onInputDown.add(this.chooseShip, this);
+  this.chooseShipLabel.events.onInputDown.add(this.changeState,{state: 'choose', introMusic: this.introMusic, game: this.game});
+  this.chooseShipLabel.events.onInputOver.add(this.overText, this);
+  this.chooseShipLabel.events.onInputOut.add(this.outText, this);
+
+
+  this.chooseShipLabel = this.game.add.text(this.game.world.centerX, 390, 'Tutorial',
+    { font: '40px Arial', fill: '#ffffff' });
+  this.chooseShipLabel.anchor.setTo(0.5, 0.5);
+  this.chooseShipLabel.inputEnabled = true;
+  this.chooseShipLabel.events.onInputDown.add(this.changeState,{state: 'tuto', introMusic: this.introMusic, game: this.game});
   this.chooseShipLabel.events.onInputOver.add(this.overText, this);
   this.chooseShipLabel.events.onInputOut.add(this.outText, this);
 },
 
 mainTitle.startGame = function () {
   this.introMusic.stop();
-	this.game.state.start('game');
+  this.game.state.start('game');
 },
 
-mainTitle.chooseShip = function () {
+mainTitle.changeState = function () {
   this.introMusic.stop();
-  this.game.state.start('choose');
+	this.game.state.start(this.state);
 },
 
 mainTitle.overText = function (sprite) {

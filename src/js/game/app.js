@@ -9,7 +9,8 @@ var states = {
   level2: require('./states/level2.js'),
   level3: require('./states/level3.js'),
   finish: require('./states/finish.js'),
-  choose: require('./states/choose.js')
+  choose: require('./states/choose.js'),
+  tuto: require('./states/tuto.js')
 };
 
 var game = new Phaser.Game(properties.size.x, properties.size.y, Phaser.AUTO, '', null, false, false);

@@ -140,10 +140,9 @@ game.create = function () {
 	    this.weaponEnemy = this.game.add.weapon(30, 'laser');
 	    this.weaponEnemy.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
 	    this.weaponEnemy.bulletSpeed = 400;
-	    this.weaponEnemy.fireRate = 500;
+	    this.weaponEnemy.fireRate = 800;
 	    this.weaponEnemy.fireAngle = 90;
 	    this.game.physics.arcade.enable(this.weaponEnemy);
-	    this.weaponEnemy.trackSprite(this.player, 0, 0, false);
 	    this.weaponEnemy.bullets.forEach((b) => {
 	    	b.scale.setTo(0.5, 0.5);
 	  	b.body.updateBounds();
@@ -333,8 +332,10 @@ game.update = function () {
 			null, this);
 
 		if(this.friend.follow){
-			this.game.physics.arcade.overlap(this.weaponFriend.bullets, this.boss, this.damageBoss,
-			null, this);
+			if(this.deployBoss){
+				this.game.physics.arcade.overlap(this.weaponFriend.bullets, this.boss, this.damageBoss,
+				null, this);
+			}
 			this.game.physics.arcade.overlap(this.weaponFriend.bullets, this.enemies, this.damageEnemy,
 			null, this);
 			if(this.deploySecondEnemy){
@@ -468,8 +469,10 @@ game.update = function () {
 	if(this.deploySecondEnemy){
 		this.secondEnemies.forEach((enemy) => {
 			if(enemy.alive){
-				this.weaponEnemy.fireAngle = enemy.angle + 90;
-				this.weaponEnemy.fire(enemy);
+				//this.weaponEnemy.fireAngle = enemy.angle + 90;
+				this.weaponEnemy.trackSprite(enemy, 0, 0, true);
+				this.weaponEnemy.fireAtSprite(this.player);
+				//this.weaponEnemy.fire(enemy);
 			}
 		}, this);	
 	}
@@ -830,7 +833,7 @@ game.dropBonus = function(spriteX, spriteY){
 			bonusSprite.scale.setTo(0.8, 0.8);
 		    this.bonuses.add(bonusSprite);
 
-	    	var tween = game.add.tween(bonusSprite.scale).to( { x: 1.05, y: 1.05 }, 500, "Linear", true);
+	    	var tween = this.game.add.tween(bonusSprite.scale).to( { x: 1.05, y: 1.05 }, 500, "Linear", true);
 	        tween.repeat(15, 500);
 
 		    this.game.time.events.add(6500, this.flashBonus, this, bonusSprite);
@@ -885,32 +888,29 @@ game.damageBoss = function(boss, laser) {
     this.finish = true;
 
     this.bossDeath.x = boss.x;
-        this.bossDeath.y = boss.y;
-        this.bossDeath.start(false, 1000, 50, 20);
+    this.bossDeath.y = boss.y;
+    this.bossDeath.start(false, 1000, 50, 20);
 
-    //this.game.time.events.add(1000, function(){
-      var explosion = this.explosions.getFirstExists(false);
-      var beforeScaleX = this.explosions.scale.x;
-      var beforeScaleY = this.explosions.scale.y;
-      var beforeAlpha = this.explosions.alpha;
-      explosion.reset(boss.body.x + boss.body.halfWidth, boss.body.y + boss.body.halfHeight);
-      explosion.alpha = 0.4;
-      explosion.scale.x = 3;
-      explosion.scale.y = 3;
-      var animation = explosion.play('explosion', 30, false, true);
-      animation.onComplete.addOnce(function(){
-          explosion.scale.x = beforeScaleX;
-          explosion.scale.y = beforeScaleY;
-          explosion.alpha = beforeAlpha;
-      });
+	  var explosion = this.explosions.getFirstExists(false);
+	  var beforeScaleX = this.explosions.scale.x;
+	  var beforeScaleY = this.explosions.scale.y;
+	  var beforeAlpha = this.explosions.alpha;
+	  explosion.reset(boss.body.x + boss.body.halfWidth, boss.body.y + boss.body.halfHeight);
+	  explosion.alpha = 0.4;
+	  explosion.scale.x = 3;
+	  explosion.scale.y = 3;
+	  var animation = explosion.play('explosion', 30, false, true);
+	  animation.onComplete.addOnce(function(){
+	      explosion.scale.x = beforeScaleX;
+	      explosion.scale.y = beforeScaleY;
+	      explosion.alpha = beforeAlpha;
+	  });
 
-      boss.kill();
-    //});
+	  boss.kill();
 
     this.game.add.tween(this.finishLabel).to( { alpha: 1 }, 2500, "Linear", true);
     this.game.time.slowMotion = 2.0;
     this.game.time.events.add(4000, this.startNextLevel, this);
-    //this.game.time.events.add(3000, this.finishGame, this);
   }
 },
 game.finishGame = function () {

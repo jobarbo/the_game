@@ -56,6 +56,14 @@ choose.create = function () {
     this.player3.events.onInputOver.add(this.displayText, this);
     this.player3.events.onInputOut.add(this.removeText, this);
   }
+
+  this.backLabel = this.game.add.text(150, 500, 'Retour',
+    { font: '28px Arial', fill: '#ffffff' });
+  this.backLabel.anchor.setTo(0.5, 0.5);
+  this.backLabel.inputEnabled = true;
+  this.backLabel.events.onInputDown.add(this.goBack, {game: this.game});
+  this.backLabel.events.onInputOver.add(this.overText, this);
+  this.backLabel.events.onInputOut.add(this.outText, this);
   
   this.muteButton = this.game.add.button(20, 20, 'mute', this.toggleSound,
   this);
@@ -65,14 +73,6 @@ choose.create = function () {
 
 choose.update = function () {
   this.background.tilePosition.y += 1;
-  
-  // Fire laser event
-  for (var index in this.phaserKeys) {
-	var key = this.phaserKeys[index];
-	if (key.justDown) {
-		this.startLevel1();
-	}
-  }
 },
 
 choose.goBack = function () {
@@ -131,5 +131,18 @@ choose.removeText = function (sprite) {
 choose.toggleSound = function() {
   this.game.sound.mute = !this.game.sound.mute;
   this.muteButton.frame = this.game.sound.mute ? 1 : 2;
+},
+
+choose.goBack = function () {
+  //this.pimpMusic.stop();
+  this.game.state.start('mainTitle');
+},
+
+choose.overText = function (sprite) {
+  sprite.scale.setTo(1.2, 1.2);
+},
+
+choose.outText = function (sprite) {
+  sprite.scale.setTo(1, 1);
 },
 module.exports = choose;
