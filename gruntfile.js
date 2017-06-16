@@ -80,6 +80,10 @@ module.exports = function (grunt) {
         files: 'src/style/*.styl',
         tasks: ['stylus']
       },
+      fonts:{
+        files: 'src/fonts/**/*',
+        tasks: ['copy:fonts']
+      },
       images: {
         files: 'src/images/**/*',
         tasks: ['copy:images']
@@ -160,6 +164,9 @@ module.exports = function (grunt) {
       images: {
         files: [ { expand: true, cwd: 'src/images/', src: ['**'], dest: 'build/images/' } ]
       },
+      fonts: {
+        files: [ { expand: true, cwd: 'src/fonts/', src: ['**'], dest: 'build/fonts/' } ]
+      },
       audio: {
         files: [ { expand: true, cwd: 'src/audio/', src: ['**'], dest: 'build/audio/' } ]
       },
@@ -212,6 +219,7 @@ module.exports = function (grunt) {
     'stylus',
     'copy:images',
     'copy:audio',
+    'copy:fonts',
     'copy:phaserArcade',
     'copy:phaserP2',
     'connect',
@@ -227,6 +235,7 @@ module.exports = function (grunt) {
     'stylus',
     'uglify',
     'copy:images',
+    'copy:fonts',
     'copy:audio',
     'copy:phaserArcadeMin',
     'cacheBust',
