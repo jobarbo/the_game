@@ -9,6 +9,10 @@ html
 
     link(rel='stylesheet', href='style/index.css')
 
+    style( type='text/css').
+      @font-face { font-family: 'inconsolata-bold'; src: url('fonts/Inconsolata-Bold.ttf') format("truetype"); /* Pretty Modern Browsers */ };
+      @font-face { font-family: 'inconsolata'; src: url('fonts/Inconsolata-Regular.ttf') format("truetype"); /* Pretty Modern Browsers */ };
+
     title=properties.title
 
     script(src="js/phaser.js")
@@ -17,6 +21,9 @@ html
     include analytics.pug
 
   body
+
+    p.hiddenText .
+    p.hiddenText2
     
 
     if (!productionBuild)

@@ -54,7 +54,7 @@ mainTitle.create = function () {
   }
 
   var highscoreLabel = this.game.add.text(this.game.world.centerX, 60, 'Meilleur score: ' + localStorage.getItem('bestScore'),
-    { font: '30px Arial', fill: '#ffffff' });
+    { font: '30px inconsolata', fill: '#ffffff' });
 
   /*var scoreLabel = this.game.add.text(50, 20, 'Score: ' + this.game.global.score,
   { font: '22px Arial', fill: '#ffffff', align: 'center' });
@@ -125,7 +125,7 @@ mainTitle.update = function () {
 
 mainTitle.createText = function () {
   this.startLabel = this.game.add.text(this.game.world.centerX, 250, 'Jouer',
-    { font: '40px Arial', fill: '#ffffff' });
+    { font: '40px inconsolata', fill: '#ffffff' });
   this.startLabel.anchor.setTo(0.5, 0.5);
   this.startLabel.inputEnabled = true;
   this.startLabel.events.onInputDown.add(this.changeState,{state: 'game', introMusic: this.introMusic, game: this.game});
@@ -133,7 +133,7 @@ mainTitle.createText = function () {
   this.startLabel.events.onInputOut.add(this.outText, this);
 
   this.chooseShipLabel = this.game.add.text(this.game.world.centerX, 320, 'Choisi ton vaisseau',
-    { font: '40px Arial', fill: '#ffffff' });
+    { font: '40px inconsolata', fill: '#ffffff' });
   this.chooseShipLabel.anchor.setTo(0.5, 0.5);
   this.chooseShipLabel.inputEnabled = true;
   this.chooseShipLabel.events.onInputDown.add(this.changeState,{state: 'choose', introMusic: this.introMusic, game: this.game});
@@ -142,7 +142,7 @@ mainTitle.createText = function () {
 
 
   this.chooseShipLabel = this.game.add.text(this.game.world.centerX, 390, 'Tutoriel',
-    { font: '40px Arial', fill: '#ffffff' });
+    { font: '40px inconsolata', fill: '#ffffff' });
   this.chooseShipLabel.anchor.setTo(0.5, 0.5);
   this.chooseShipLabel.inputEnabled = true;
   this.chooseShipLabel.events.onInputDown.add(this.changeState,{state: 'tuto', introMusic: this.introMusic, game: this.game});
