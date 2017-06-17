@@ -7,7 +7,7 @@ game.create = function () {
 
   this.playerBonus = '';
   this.game.global.currentWeapon = 'laser_green';
-  this.game.input.keyboard.onDownCallback = function(e) {    
+  this.game.input.keyboard.onDownCallback = function(e) {
   	if(e.keyCode == 49){
   		this.game.global.currentWeapon = 'laser_green';
   	}

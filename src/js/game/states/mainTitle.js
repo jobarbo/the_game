@@ -1,26 +1,19 @@
 var mainTitle = {};
 
-/*
-WebFontConfig = {
-
-    //  'active' means all requested fonts have finished loading
-    //  We set a 1 second delay before calling 'createText'.
-    //  For some reason if we don't the browser cannot render the text the first time it's created.
-    active: function() { 
-      this.game.time.events.add(Phaser.Timer.SECOND, this.createText, this); 
-    },
-
-    //  The Google Fonts we want to load (specify as many as you like in the array)
-    google: {
-      families: ['Inconsolata']
-    }
-
-};*/
-
 mainTitle.create = function () {
 
-  //localStorage.setItem('ship1Unlock', false);
-  //localStorage.setItem('ship2Unlock', false);
+  this.game.input.keyboard.onDownCallback = function(e) {
+    // If delete key is pressed
+    if(e.keyCode == 46){
+      localStorage.setItem('ship1Unlock', false);
+      localStorage.setItem('ship2Unlock', false);
+      localStorage.setItem('bestScore', 0);
+      this.game.global.ship = 'ship1';
+      this.game.global.score = 0;
+      this.game.global.level = 1;
+      this.game.global.life = 3;
+    }
+  }
 	
   this.delayMeteor = 5000;
 
