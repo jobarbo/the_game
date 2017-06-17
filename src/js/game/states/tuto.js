@@ -6,9 +6,9 @@ tuto.create = function () {
   this.background.anchor.setTo(0.5, 0.5);
   this.background.scale.setTo(3.4, 3.4);
 
-  this.chooseShipLabel = this.game.add.text(this.game.world.centerX, 130, 'Bonus',
+  this.titleLabel = this.game.add.text(this.game.world.centerX, 130, 'Bonus',
     { font: '60px Arial', fill: '#ffffff' });
-  this.chooseShipLabel.anchor.setTo(0.5, 0.5);
+  this.titleLabel.anchor.setTo(0.5, 0.5);
 
   this.backLabel = this.game.add.text(150, 500, 'Retour',
     { font: '28px Arial', fill: '#ffffff' });
@@ -32,11 +32,11 @@ tuto.create = function () {
       tween.repeat(15, 500);
 
     text = 'Le missile tête chercheuse fonce directement sur l\'ennemi le plus proche, easy peasy !';
-  this.missileLabel = this.game.add.text(500, 245, text,
+  this.firstBonusLabel = this.game.add.text(500, 245, text,
     { font: '16px Arial', fill: '#ffffff' });
-  this.missileLabel.wordWrap = true;
-  this.missileLabel.wordWrapWidth = 300;
-  this.missileLabel.anchor.setTo(0.5, 0.5);
+  this.firstBonusLabel.wordWrap = true;
+  this.firstBonusLabel.wordWrapWidth = 300;
+  this.firstBonusLabel.anchor.setTo(0.5, 0.5);
 
   this.multiammo = this.game.add.sprite(260, 350, 'multiammo');
   this.multiammo.anchor.setTo(0.5, 0.5);
@@ -45,12 +45,54 @@ tuto.create = function () {
   var tween = this.game.add.tween(this.multiammo.scale).to( { x: 1.05, y: 1.05 }, 500, "Linear", true);
       tween.repeat(15, 500);
 
+      this.weapon1 = this.game.add.sprite(260, 250, 'laser_green');
+      this.weapon1.anchor.setTo(0.5, 0.5);
+      this.weapon1.scale.setTo(1.5, 1.5);
+      this.weapon1.visible = false;
+
+      this.weapon2 = this.game.add.sprite(260, 350, 'laser_blue');
+      this.weapon2.anchor.setTo(0.5, 0.5);
+      this.weapon2.scale.setTo(2.5, 1.5);
+      this.weapon2.visible = false;
+
     text = 'Multiplie vos lasers   \\ | /';
-  this.multiammoLabel = this.game.add.text(440, 355, text,
+  this.secondBonusLabel = this.game.add.text(440, 355, text,
     { font: '16px Arial', fill: '#ffffff' });
-  this.multiammoLabel.wordWrap = true;
-  this.multiammoLabel.wordWrapWidth = 300;
-  this.multiammoLabel.anchor.setTo(0.5, 0.5);
+  this.secondBonusLabel.wordWrap = true;
+  this.secondBonusLabel.wordWrapWidth = 300;
+  this.secondBonusLabel.anchor.setTo(0.5, 0.5);
+
+  this.nextLabel = this.game.add.text(650, 500, 'Suivant',
+    { font: '28px Arial', fill: '#ffffff' });
+  this.nextLabel.anchor.setTo(0.5, 0.5);
+  this.nextLabel.inputEnabled = true;
+  this.nextLabel.events.onInputDown.add(this.goNext, {
+      titleLabel: this.titleLabel, 
+      multiammo: this.multiammo, 
+      missile: this.missile, 
+      weapon2: this.weapon2, 
+      weapon1: this.weapon1,
+      secondBonusLabel: this.secondBonusLabel,
+      firstBonusLabel: this.firstBonusLabel,
+    });
+  this.nextLabel.events.onInputOver.add(this.overText, this);
+  this.nextLabel.events.onInputOut.add(this.outText, this);
+
+  this.previousLabel = this.game.add.text(500, 500, 'Précédent',
+    { font: '28px Arial', fill: '#ffffff' });
+  this.previousLabel.anchor.setTo(0.5, 0.5);
+  this.previousLabel.inputEnabled = true;
+  this.previousLabel.events.onInputDown.add(this.goPrevious, {
+      titleLabel: this.titleLabel, 
+      multiammo: this.multiammo, 
+      missile: this.missile, 
+      weapon2: this.weapon2, 
+      weapon1: this.weapon1,
+      secondBonusLabel: this.secondBonusLabel,
+      firstBonusLabel: this.firstBonusLabel,
+    });
+  this.previousLabel.events.onInputOver.add(this.overText, this);
+  this.previousLabel.events.onInputOut.add(this.outText, this);
   
 },
 
@@ -75,6 +117,28 @@ tuto.overText = function (sprite) {
 
 tuto.outText = function (sprite) {
   sprite.scale.setTo(1, 1);
+},
+
+tuto.goNext = function () {
+  this.titleLabel.text = 'Améliorations';
+  this.firstBonusLabel.text = 'Laser de basse qualité, mais performant !';
+  this.secondBonusLabel.text = 'Un laser puissant qui fait le ménage !';
+  this.secondBonusLabel.x = 480;
+  this.missile.visible = false;
+  this.multiammo.visible = false;
+  this.weapon1.visible = true;
+  this.weapon2.visible = true;
+},
+
+tuto.goPrevious = function () {
+  this.titleLabel.text = 'Bonus';
+  this.firstBonusLabel.text = 'Le missile tête chercheuse fonce directement sur l\'ennemi le plus proche, easy peasy !';
+  this.secondBonusLabel.text = 'Multiplie vos lasers   \\ | /';
+  this.secondBonusLabel.x = 440;
+  this.missile.visible = true;
+  this.multiammo.visible = true;
+  this.weapon1.visible = false;
+  this.weapon2.visible = false;
 },
 
 module.exports = tuto;

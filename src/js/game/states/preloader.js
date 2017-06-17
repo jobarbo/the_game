@@ -13,6 +13,7 @@ preloader.preload = function () {
   this.game.load.image('ship3_life', 'images/player/ship3_life.png');
   this.game.load.image('laser', 'images/laserr.png');
   this.game.load.image('laser_green', 'images/laserg.png');
+  this.game.load.image('laser_blue', 'images/laserb.png');
   this.game.load.image('coin', 'images/collectables/coin/gold_1.png');
   this.game.load.image('shield_bonus', 'images/collectables/shield.png');
   this.game.load.image('pill', 'images/collectables/pill.png');
