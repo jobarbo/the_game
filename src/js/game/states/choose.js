@@ -68,11 +68,17 @@ choose.create = function () {
   this.muteButton = this.game.add.button(20, 20, 'mute', this.toggleSound,
   this);
   this.muteButton.frame = this.game.sound.mute ? 1 : 2;
+
+  this.backspace = this.game.input.keyboard.addKey(Phaser.KeyCode.BACKSPACE);
   
 },
 
 choose.update = function () {
   this.background.tilePosition.y += 1;
+
+  if(this.backspace.isDown){
+    this.goBack();
+  }
 },
 
 choose.goBack = function () {

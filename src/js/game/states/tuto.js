@@ -2,6 +2,8 @@ var tuto = {};
 
 tuto.create = function () {
 
+  this.keyPressed = false;
+
   this.background = this.game.add.tileSprite(this.game.world.centerX - 10, this.game.world.centerY, 800, 600, 'background');
   this.background.anchor.setTo(0.5, 0.5);
   this.background.scale.setTo(3.4, 3.4);
@@ -26,8 +28,8 @@ tuto.create = function () {
   'Un vaisseau combatant vous accompagne un court instant',
   'Le bouclier vous protège des lasers et des météorites',
   'Une pilule, une tite granule, une vie',
-  'Laser de basse qualité, mais performant !',
-  'Un laser puissant qui fait le ménage !'
+  'Laser de basse qualité, mais performant ! Appuyer sur [1] pour activer',
+  'Un laser puissant qui fait le ménage ! Appuyer sur [2] pour activer'
   ];
   this.arrBonusKey = ['missile', 'multiammo', 'friend_bonus', 'shield_bonus', 'pill'];
 
@@ -109,11 +111,42 @@ tuto.create = function () {
     });
   this.previousLabel.events.onInputOver.add(this.overText, this);
   this.previousLabel.events.onInputOut.add(this.outText, this);
+
+  cursors = this.game.input.keyboard.createCursorKeys();
+  this.backspace = this.game.input.keyboard.addKey(Phaser.KeyCode.BACKSPACE);
+  this.wasd = {
+    up: this.game.input.keyboard.addKey(Phaser.Keyboard.W),
+    down: this.game.input.keyboard.addKey(Phaser.Keyboard.S),
+    left: this.game.input.keyboard.addKey(Phaser.Keyboard.A),
+    right: this.game.input.keyboard.addKey(Phaser.Keyboard.D)
+  };
   
 },
 
 tuto.update = function () {
   this.background.tilePosition.y += 1;
+
+  if ( (cursors.left.isDown  || this.wasd.left.isDown) && (cursors.right.isUp && this.wasd.right.isUp) ){
+      if (!this.keyPressed) {
+          this.goPrevious();
+          this.keyPressed = true;
+      }
+  }
+
+  if ( (cursors.left.isUp  && this.wasd.left.isUp) && (cursors.right.isDown  || this.wasd.right.isDown) ){
+      if (!this.keyPressed) {
+          this.goNext();
+          this.keyPressed = true;
+      }
+  }
+
+  if(this.backspace.isDown){
+    this.goBack();
+  }
+
+  if (cursors.left.isUp && cursors.right.isUp && this.wasd.left.isUp && this.wasd.right.isUp) {
+      this.keyPressed = false;
+  }
   
 },
 
@@ -178,8 +211,7 @@ tuto.goNext = function () {
       this.weapon1.visible = true;
       this.weapon2.visible = true;
 
-      this.firstBonusLabel.x = 470;
-      this.secondBonusLabel.x = 500;
+      this.secondBonusLabel.x = 490;
 
       this.firstBonusLabel.text = this.arrBonusText[this.game.global.currentPage  + 1];
       this.secondBonusLabel.text = this.arrBonusText[this.game.global.currentPage + 2];
@@ -225,6 +257,7 @@ tuto.goPrevious = function () {
       this.bonus1.loadTexture('pill', 0);
       this.firstBonusLabel.text = this.arrBonusText[this.game.global.currentPage  + 1];
       this.secondBonusLabel.text = ''; //this.arrBonusText[this.game.global.currentPage + 2];
+      this.bonus2.visible = false;
       break;
     case 4:
       this.titleLabel.text = 'Améliorations';

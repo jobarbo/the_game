@@ -14,6 +14,11 @@ game.create = function () {
   	if(e.keyCode == 50){
   		this.game.global.currentWeapon = 'laser_blue';
   	} 
+  	if(e.keyCode == 27){
+  		if(this.game.paused){
+  			this.game.paused = false;
+  		}
+  	}
   }
   this.shield = null;
   this.bonusDropped = false;
@@ -303,11 +308,19 @@ game.create = function () {
   	right: this.game.input.keyboard.addKey(Phaser.Keyboard.D)
   };
   cursors = this.game.input.keyboard.createCursorKeys();
+
+  this.escape = this.game.input.keyboard.addKey(Phaser.KeyCode.ESC);
 },
 
 game.update = function () {
 
 	this.background.tilePosition.y += 1;
+
+	if(this.escape.isDown){
+		if(!this.game.paused){
+			this.game.paused = true;
+		}
+	}
 
 	if(!this.finish){
 		// Overlap
