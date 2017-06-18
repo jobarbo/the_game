@@ -275,14 +275,14 @@ game.create = function () {
 
   // Labels
   this.scoreLabel = this.game.add.text(50, 20, 'Score: 0/' + this.pointToNextLevel,
-  	{ font: '22px Arial', fill: '#ffffff' });
+  	{ font: '22px inconsolata', fill: '#ffffff' });
   this.levelLabel = this.game.add.text(this.game.world.centerX - 30, 20, 'Niveau ' + this.game.global.level,
-  	{ font: '22px Arial', fill: '#ffffff' });
+  	{ font: '22px inconsolata', fill: '#ffffff' });
   this.bonusLabel = this.game.add.text(40, this.game.world.height + 50, 'Temps bonus: ',
-  	{ font: '22px Arial', fill: '#ffffff' });
+  	{ font: '22px inconsolata', fill: '#ffffff' });
 
   this.finishLabel = this.game.add.text(this.game.world.centerX, this.game.world.centerY, 'TERMINÉ',
-  	{ font: '40px Arial', fill: '#ffffff' });
+  	{ font: '40px inconsolata', fill: '#ffffff' });
   this.finishLabel.anchor.setTo(0.5,0.5);
   this.finishLabel.alpha = 0;
 
@@ -686,7 +686,7 @@ game.damageEnemy = function(sprite, enemy) {
 
 		// Points label
 		this.pointsLabel = this.game.add.text(enemyX, enemyY - 5, '+' + pointForKill + 'pts',
-			{ font: '16px Arial', fill: '#ffffff' });
+			{ font: '16px inconsolata', fill: '#ffffff' });
 		this.pointsLabel.alpha = 0;
 		this.game.add.tween(this.pointsLabel).to( { alpha: 1 }, 1200, "Linear", true);
 		this.game.add.tween(this.pointsLabel).to( { y: (enemyY - 30) }, 1000, "Linear", true);
@@ -917,11 +917,11 @@ game.damageBoss = function(boss, laser) {
 	}
 	if(shipToUnlock){
 		this.newShipLabel = this.game.add.text(this.game.world.centerX + 20, this.game.world.centerY - 200, 'Nouveau vaisseau débloqué !',
-			{ font: '30px Arial', fill: '#ffffff' });
+			{ font: '30px inconsolata', fill: '#ffffff' });
 		this.newShipLabel.anchor.setTo(0.5,0.5);
 		this.newShipLabel.alpha = 0;
 
-		this.newShip = this.game.add.sprite(this.game.world.centerX - 150, this.game.world.centerY - 200, shipToUnlock + '_life');
+		this.newShip = this.game.add.sprite(this.game.world.centerX - 220, this.game.world.centerY - 202, shipToUnlock + '_life');
 		this.newShip.anchor.setTo(0.5, 0.5);
 		this.newShip.alpha = 0;
 

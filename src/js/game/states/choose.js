@@ -11,7 +11,7 @@ choose.create = function () {
   this.pimpMusic.play();
 
   this.chooseShipLabel = this.game.add.text(this.game.world.centerX, 180, 'Choisi ton vaisseau',
-    { font: '60px Arial', fill: '#ffffff' });
+    { font: '60px inconsolata', fill: '#ffffff' });
   this.chooseShipLabel.anchor.setTo(0.5, 0.5);
 
 
@@ -58,7 +58,7 @@ choose.create = function () {
   }
 
   this.backLabel = this.game.add.text(150, 500, 'Retour',
-    { font: '28px Arial', fill: '#ffffff' });
+    { font: '28px inconsolata', fill: '#ffffff' });
   this.backLabel.anchor.setTo(0.5, 0.5);
   this.backLabel.inputEnabled = true;
   this.backLabel.events.onInputDown.add(this.goBack, {game: this.game});
@@ -102,7 +102,7 @@ choose.overShip = function (sprite) {
   }
 
   this.statsLabel = this.game.add.text(sprite.x, sprite.y - 80, text,
-    { font: '20px Arial', fill: '#ffffff' });
+    { font: '20px inconsolata', fill: '#ffffff' });
   this.statsLabel.anchor.setTo(0.5, 0.5);
 },
 
@@ -114,11 +114,11 @@ choose.outShip = function (sprite) {
 choose.displayText = function (sprite) {
   if(sprite.key == 'ship3'){
     this.unlockLabel = this.game.add.text(this.player3.x, this.player3.y - 50, 'Débloque au niveau 5',
-      { font: '20px Arial', fill: '#ffffff' });
+      { font: '20px inconsolata', fill: '#ffffff' });
   }
   else{
     this.unlockLabel = this.game.add.text(this.player2.x, this.player2.y - 50, 'Débloque au niveau 3',
-      { font: '20px Arial', fill: '#ffffff' });  
+      { font: '20px inconsolata', fill: '#ffffff' });  
   }
   
   this.unlockLabel.anchor.setTo(0.5, 0.5);
