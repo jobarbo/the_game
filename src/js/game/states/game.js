@@ -6,6 +6,20 @@ game.create = function () {
   this.game.time.slowMotion = 1.0;
 
   this.playerBonus = '';
+  this.game.global.currentWeapon = 'laser_green';
+  this.game.input.keyboard.onDownCallback = function(e) {
+  	if(e.keyCode == 49){
+  		this.game.global.currentWeapon = 'laser_green';
+  	}
+  	if(e.keyCode == 50){
+  		this.game.global.currentWeapon = 'laser_blue';
+  	} 
+  	if(e.keyCode == 27){
+  		if(this.game.paused){
+  			this.game.paused = false;
+  		}
+  	}
+  }
   this.shield = null;
   this.bonusDropped = false;
   this.nextShotAt = 0;
@@ -165,6 +179,19 @@ game.create = function () {
   }, this);
   this.weapon.bulletAngleOffset = 90;
 
+    this.weaponBlue = this.game.add.weapon(30, 'laser_blue');
+    this.weaponBlue.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+    this.weaponBlue.bulletSpeed = 1000;
+    this.weaponBlue.fireRate = 2000;
+    this.weaponBlue.fireAngle = 270;
+    this.game.physics.arcade.enable(this.weaponBlue);
+    this.weaponBlue.trackSprite(this.player, 0, -230, false);
+    this.weaponBlue.bullets.forEach((b) => {
+    	b.scale.setTo(3, 8);
+  	b.body.updateBounds();
+    }, this);
+    this.weaponBlue.bulletAngleOffset = 90;
+
   this.weaponFriend = this.game.add.weapon(10, 'laser');
   this.weaponFriend.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
   this.weaponFriend.bulletSpeed = 400;
@@ -253,14 +280,14 @@ game.create = function () {
 
   // Labels
   this.scoreLabel = this.game.add.text(50, 20, 'Score: 0/' + this.pointToNextLevel,
-  	{ font: '22px Arial', fill: '#ffffff' });
+  	{ font: '22px inconsolata', fill: '#ffffff' });
   this.levelLabel = this.game.add.text(this.game.world.centerX - 30, 20, 'Niveau ' + this.game.global.level,
-  	{ font: '22px Arial', fill: '#ffffff' });
+  	{ font: '22px inconsolata', fill: '#ffffff' });
   this.bonusLabel = this.game.add.text(40, this.game.world.height + 50, 'Temps bonus: ',
-  	{ font: '22px Arial', fill: '#ffffff' });
+  	{ font: '22px inconsolata', fill: '#ffffff' });
 
   this.finishLabel = this.game.add.text(this.game.world.centerX, this.game.world.centerY, 'TERMINÉ',
-  	{ font: '40px Arial', fill: '#ffffff' });
+  	{ font: '40px inconsolata', fill: '#ffffff' });
   this.finishLabel.anchor.setTo(0.5,0.5);
   this.finishLabel.alpha = 0;
 
@@ -281,11 +308,19 @@ game.create = function () {
   	right: this.game.input.keyboard.addKey(Phaser.Keyboard.D)
   };
   cursors = this.game.input.keyboard.createCursorKeys();
+
+  this.escape = this.game.input.keyboard.addKey(Phaser.KeyCode.ESC);
 },
 
 game.update = function () {
 
 	this.background.tilePosition.y += 1;
+
+	if(this.escape.isDown){
+		if(!this.game.paused){
+			this.game.paused = true;
+		}
+	}
 
 	if(!this.finish){
 		// Overlap
@@ -310,6 +345,9 @@ game.update = function () {
 			  null, this);
 			this.game.physics.arcade.overlap(this.weapon.bullets, this.boss, this.damageBoss,
 			  null, this);
+
+			this.game.physics.arcade.overlap(this.weaponBlue.bullets, this.boss, this.damageBoss,
+			  null, this);
 		}
 
 		if(this.deploySecondEnemy){
@@ -319,11 +357,18 @@ game.update = function () {
 				null, this);
 			this.game.physics.arcade.overlap(this.weapon.bullets, this.secondEnemies, this.damageEnemy,
 				null, this);
+
+			this.game.physics.arcade.overlap(this.weaponBlue.bullets, this.secondEnemies, this.damageEnemy,
+			  null, this);
 		}
 		
 		this.game.physics.arcade.overlap(this.weapon.bullets, this.meteors, this.touchMeteor,
 			null, this);
+		this.game.physics.arcade.overlap(this.weaponBlue.bullets, this.meteors, this.touchMeteor,
+			null, this);
 		this.game.physics.arcade.overlap(this.weapon.bullets, this.enemies, this.damageEnemy,
+			null, this);
+		this.game.physics.arcade.overlap(this.weaponBlue.bullets, this.enemies, this.damageEnemy,
 			null, this);
 
 
@@ -425,8 +470,6 @@ game.update = function () {
   	}
   }
 
-  
-
 	// Fire laser event
 	if(this.player.alive){
 		if (this.spacebar.isDown) {
@@ -459,9 +502,14 @@ game.update = function () {
 				}
 			}
 			else{
-				this.weapon.fireRate = 200;
-				this.weapon.fireAngle = 270;
-				this.weapon.fire();
+				if(this.game.global.currentWeapon == 'laser_green'){
+					this.weapon.fireRate = 200;
+					this.weapon.fireAngle = 270;
+					this.weapon.fire();
+				}
+				else{
+					this.weaponBlue.fire();
+				}
 			}
 		}
 	}
@@ -651,7 +699,7 @@ game.damageEnemy = function(sprite, enemy) {
 
 		// Points label
 		this.pointsLabel = this.game.add.text(enemyX, enemyY - 5, '+' + pointForKill + 'pts',
-			{ font: '16px Arial', fill: '#ffffff' });
+			{ font: '16px inconsolata', fill: '#ffffff' });
 		this.pointsLabel.alpha = 0;
 		this.game.add.tween(this.pointsLabel).to( { alpha: 1 }, 1200, "Linear", true);
 		this.game.add.tween(this.pointsLabel).to( { y: (enemyY - 30) }, 1000, "Linear", true);
@@ -725,7 +773,12 @@ game.addMeteor = function() {
 	meteor.outOfBoundsKill = true;
 },
 game.touchMeteor = function(laser, meteor) {
-	laser.kill();
+	if(laser.key != 'laser_blue'){
+		laser.kill();
+	}
+	else{
+		meteor.healthPoint = 0;
+	}
 
 	if(meteor.key == 'meteor_grey' || meteor.key == 'meteor_grey_med'){
 
@@ -850,9 +903,14 @@ game.flashBonus = function(sprite){
     tween.repeat(10, 200);
 },
 game.damageBoss = function(boss, laser) {
-  laser.kill();
+  if(laser.key != 'laser_blue'){
+  	laser.kill();
+  	this.boss.healthPoint -= 10;
+  }
+  else{
+  	this.boss.healthPoint -= 4;
+  }
 
-  this.boss.healthPoint -= 10;
   this.bossLifeBar.scale.setTo( (this.boss.healthPoint / this.maxBossLife ) , 1); 
 
   // Not sure ..
@@ -872,11 +930,11 @@ game.damageBoss = function(boss, laser) {
 	}
 	if(shipToUnlock){
 		this.newShipLabel = this.game.add.text(this.game.world.centerX + 20, this.game.world.centerY - 200, 'Nouveau vaisseau débloqué !',
-			{ font: '30px Arial', fill: '#ffffff' });
+			{ font: '30px inconsolata', fill: '#ffffff' });
 		this.newShipLabel.anchor.setTo(0.5,0.5);
 		this.newShipLabel.alpha = 0;
 
-		this.newShip = this.game.add.sprite(this.game.world.centerX - 150, this.game.world.centerY - 200, shipToUnlock + '_life');
+		this.newShip = this.game.add.sprite(this.game.world.centerX - 220, this.game.world.centerY - 202, shipToUnlock + '_life');
 		this.newShip.anchor.setTo(0.5, 0.5);
 		this.newShip.alpha = 0;
 

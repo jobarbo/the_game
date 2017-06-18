@@ -37,6 +37,8 @@ game.global = {
 	life: 3,
   level: 1,
   ship: 'ship1',
+  currentWeapon: 'laser_green',
+  currentPage: 1,
 };
 
 
