@@ -7,7 +7,8 @@ game.create = function () {
 
   this.playerBonus = '';
   this.game.global.currentWeapon = 'laser_green';
-  this.game.input.keyboard.onDownCallback = function(e) {
+  this.game.input.keyboard.onDownCallback = function(e) {  
+
   	if(e.keyCode == 49){
   		this.game.global.currentWeapon = 'laser_green';
   	}
@@ -238,7 +239,7 @@ game.create = function () {
   	this.weaponBoss.bulletSpeed = 400;
   	this.weaponBoss.fireRate = 800;
   	this.weaponBoss.fireAngle = 90;
-  	this.weaponBoss.bulletAngleVariance  = 40;
+  	this.weaponBoss.bulletAngleVariance  = 30;
   	this.game.physics.arcade.enable(this.weaponBoss);
   	this.weaponBoss.trackSprite(this.boss, 0, 0, false);
   	this.weaponBoss.bullets.forEach((b) => {
@@ -291,6 +292,9 @@ game.create = function () {
   this.finishLabel.anchor.setTo(0.5,0.5);
   this.finishLabel.alpha = 0;
 
+  this.weaponLabel = this.game.add.text(650, 500, 'Laser 1',
+    { font: '22px inconsolata', fill: '#ffffff' });
+
   // Sounds
   this.coinSound = this.game.add.audio('coin');
   this.laserSound = this.game.add.audio('laser');
@@ -315,6 +319,13 @@ game.create = function () {
 game.update = function () {
 
 	this.background.tilePosition.y += 1;
+
+  if(this.game.global.currentWeapon == 'laser_green'){
+    this.weaponLabel.text = 'Laser 1';
+  }
+  else{
+    this.weaponLabel.text = 'Laser 2';
+  }
 
 	if(this.escape.isDown){
 		if(!this.game.paused){

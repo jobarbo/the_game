@@ -61,7 +61,7 @@ choose.create = function () {
     { font: '28px inconsolata', fill: '#ffffff' });
   this.backLabel.anchor.setTo(0.5, 0.5);
   this.backLabel.inputEnabled = true;
-  this.backLabel.events.onInputDown.add(this.goBack, {game: this.game});
+  this.backLabel.events.onInputDown.add(this.goBack, {game: this.game, pimpMusic: this.pimpMusic});
   this.backLabel.events.onInputOver.add(this.overText, this);
   this.backLabel.events.onInputOut.add(this.outText, this);
   
@@ -79,11 +79,6 @@ choose.update = function () {
   if(this.backspace.isDown){
     this.goBack();
   }
-},
-
-choose.goBack = function () {
-  this.pimpMusic.stop();
-	this.game.state.start('mainTitle');
 },
 
 choose.selectShip = function (sprite) {
@@ -140,7 +135,7 @@ choose.toggleSound = function() {
 },
 
 choose.goBack = function () {
-  //this.pimpMusic.stop();
+  this.pimpMusic.stop();
   this.game.state.start('mainTitle');
 },
 
