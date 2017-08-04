@@ -898,7 +898,8 @@ game.dropBonus = function(spriteX, spriteY){
 		    this.bonuses.add(bonusSprite);
 
 	    	var tween = this.game.add.tween(bonusSprite.scale).to( { x: 1.05, y: 1.05 }, 500, "Linear", true);
-	        tween.repeat(15, 500);
+        tween.repeat(15, 500);
+        tween.yoyo(true, 10);
 
 		    this.game.time.events.add(6500, this.flashBonus, this, bonusSprite);
 			this.game.time.events.add(10000, this.resetBonus, this, bonusSprite);
@@ -910,8 +911,8 @@ game.resetBonus = function(sprite){
 	this.bonusDropped = false;
 },
 game.flashBonus = function(sprite){
-	var tween = game.add.tween(sprite).to( { alpha: 0 }, 200, "Linear", true);
-    tween.repeat(10, 200);
+	var tween = game.add.tween(sprite).to( { alpha: 0 }, 200, "Linear", true,0,-1);
+  tween.yoyo(true, 10);
 },
 game.damageBoss = function(boss, laser) {
   if(laser.key != 'laser_blue'){
