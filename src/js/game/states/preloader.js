@@ -1,7 +1,6 @@
 var preloader = {};
 
 preloader.preload = function () {
-  this.game.load.image('logo', 'images/phaser.png');
   this.game.load.image('button', 'images/button_green.png');
   this.game.load.image('background', 'images/background/bg.png');
   this.game.load.image('ship1', 'images/player/ship1.png');
