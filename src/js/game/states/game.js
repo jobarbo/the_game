@@ -1,7 +1,6 @@
 var game = {};
 
 game.create = function () {
-
   this.game.global.score = 0;
   this.game.time.slowMotion = 1.0;
 
@@ -249,7 +248,7 @@ game.create = function () {
   	this.weaponBoss.bulletAngleOffset = 90;
   }
 
-    //  An explosion pool
+  //  An explosion pool
   this.explosions = this.game.add.group();
   this.explosions.enableBody = true;
   this.explosions.physicsBodyType = Phaser.Physics.ARCADE;
