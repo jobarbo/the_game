@@ -2,9 +2,9 @@ var mainTitle = {};
 
 mainTitle.create = function () {
 
-  this.game.input.keyboard.onDownCallback = function(e) {
+  this.game.input.keyboard.onDownCallback = function (e) {
     // If delete key is pressed
-    if(e.keyCode == 46){
+    if (e.keyCode == 46) {
       localStorage.setItem('ship1Unlock', false);
       localStorage.setItem('ship2Unlock', false);
       localStorage.setItem('bestScore', 0);
@@ -13,8 +13,8 @@ mainTitle.create = function () {
       this.game.global.level = 1;
       this.game.global.life = 3;
     }
-  }
-	
+  };
+
   this.delayMeteor = 5000;
 
   this.game.physics.startSystem(Phaser.Physics.P2JS);
@@ -56,8 +56,8 @@ mainTitle.create = function () {
   // Meteors
   this.meteors = this.game.add.group();
   this.meteors.createMultiple(3, 'meteor');
-  for (i = 0; i <this.meteors.length ; i++) {
-    this.meteors.children[i].scale.setTo(0.8,0.8);
+  for (i = 0; i < this.meteors.length; i++) {
+    this.meteors.children[i].scale.setTo(0.8, 0.8);
   }
   this.meteors.enableBody = true;
   this.game.physics.arcade.enable(this.meteors);
@@ -72,20 +72,20 @@ mainTitle.create = function () {
   this.createText();
 
   this.muteButton = this.game.add.button(20, 20, 'mute', this.toggleSound,
-  this);
+    this);
 
-  
+
   // Mute setting
   if (!localStorage.getItem('mute')) {
     localStorage.setItem('mute', false);
     this.muteButton.frame = 2;
   }
-  else{
-    if(localStorage.getItem('mute') == 'false'){
+  else {
+    if (localStorage.getItem('mute') == 'false') {
       this.muteButton.frame = 2;
       this.game.sound.mute = false;
     }
-    else{
+    else {
       this.muteButton.frame = 1;
       this.game.sound.mute = true;
     }
@@ -96,10 +96,10 @@ mainTitle.create = function () {
 mainTitle.update = function () {
   // Fire laser event
   for (var index in this.phaserKeys) {
-  	var key = this.phaserKeys[index];
-  	if (key.justDown) {
-  		this.startGame();
-  	}
+    var key = this.phaserKeys[index];
+    if (key.justDown) {
+      this.startGame();
+    }
   }
 
   // Meteors spawn
@@ -121,7 +121,7 @@ mainTitle.createText = function () {
     { font: '40px inconsolata', fill: '#ffffff' });
   this.startLabel.anchor.setTo(0.5, 0.5);
   this.startLabel.inputEnabled = true;
-  this.startLabel.events.onInputDown.add(this.changeState,{state: 'game', introMusic: this.introMusic, game: this.game});
+  this.startLabel.events.onInputDown.add(this.changeState, { state: 'game', introMusic: this.introMusic, game: this.game });
   this.startLabel.events.onInputOver.add(this.overText, this);
   this.startLabel.events.onInputOut.add(this.outText, this);
 
@@ -129,7 +129,7 @@ mainTitle.createText = function () {
     { font: '40px inconsolata', fill: '#ffffff' });
   this.chooseShipLabel.anchor.setTo(0.5, 0.5);
   this.chooseShipLabel.inputEnabled = true;
-  this.chooseShipLabel.events.onInputDown.add(this.changeState,{state: 'choose', introMusic: this.introMusic, game: this.game});
+  this.chooseShipLabel.events.onInputDown.add(this.changeState, { state: 'choose', introMusic: this.introMusic, game: this.game });
   this.chooseShipLabel.events.onInputOver.add(this.overText, this);
   this.chooseShipLabel.events.onInputOut.add(this.outText, this);
 
@@ -138,7 +138,7 @@ mainTitle.createText = function () {
     { font: '40px inconsolata', fill: '#ffffff' });
   this.chooseShipLabel.anchor.setTo(0.5, 0.5);
   this.chooseShipLabel.inputEnabled = true;
-  this.chooseShipLabel.events.onInputDown.add(this.changeState,{state: 'tuto', introMusic: this.introMusic, game: this.game});
+  this.chooseShipLabel.events.onInputDown.add(this.changeState, { state: 'tuto', introMusic: this.introMusic, game: this.game });
   this.chooseShipLabel.events.onInputOver.add(this.overText, this);
   this.chooseShipLabel.events.onInputOut.add(this.outText, this);
 },
@@ -150,7 +150,7 @@ mainTitle.startGame = function () {
 
 mainTitle.changeState = function () {
   this.introMusic.stop();
-	this.game.state.start(this.state);
+  this.game.state.start(this.state);
 },
 
 mainTitle.overText = function (sprite) {
@@ -161,42 +161,42 @@ mainTitle.outText = function (sprite) {
   sprite.scale.setTo(1, 1);
 },
 
-mainTitle.toggleSound = function() {
+mainTitle.toggleSound = function () {
   this.game.sound.mute = !this.game.sound.mute;
   localStorage.setItem('mute', this.game.sound.mute);
   this.muteButton.frame = this.game.sound.mute ? 1 : 2;
 },
 // Meteors
-mainTitle.addMeteor = function() {
+mainTitle.addMeteor = function () {
   var meteor = this.meteors.getFirstDead();
   if (!meteor) {
     return;
   }
   var key = this.game.rnd.pick(['meteor_grey_med', 'meteor_grey', 'meteor_med', 'meteor']);
-  var angle = this.game.rnd.pick([0,20,40,60,80,100]);
+  var angle = this.game.rnd.pick([0, 20, 40, 60, 80, 100]);
   meteor.key = key;
   meteor.loadTexture(key, 0);
   meteor.anchor.setTo(0.5, 0.5);
   meteor.angle = angle;
-  if(key == 'meteor_grey_med' || key == 'meteor_med'){
+  if (key == 'meteor_grey_med' || key == 'meteor_med') {
     meteor.healthPoint = 2;
   }
-  else{
+  else {
     meteor.healthPoint = 3;
   }
 
-  var direction = this.game.rnd.pick(['horizontal', 'vertical']); 
-  if(direction == 'vertical'){
+  var direction = this.game.rnd.pick(['horizontal', 'vertical']);
+  if (direction == 'vertical') {
     meteor.reset(this.game.rnd.pick([200, 300, 400, 500, 600]), 0);
     meteor.body.velocity.y = this.game.rnd.pick([100, 150]);
     meteor.body.velocity.x = this.game.rnd.pick([0, 50, 100]) * this.game.rnd.pick([-1, 1]);
   }
-  else{
+  else {
     meteor.reset(0, this.game.rnd.pick([200, 300, 400]));
     meteor.body.velocity.y = this.game.rnd.pick([25, 50, 75]) * this.game.rnd.pick([-1, 1]);
     meteor.body.velocity.x = this.game.rnd.pick([100, 150]);
   }
-  
+
   meteor.checkWorldBounds = true;
   meteor.outOfBoundsKill = true;
 },
