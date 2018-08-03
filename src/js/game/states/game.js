@@ -7,14 +7,14 @@ game.create = function () {
 
   this.playerBonus = '';
   this.game.global.currentWeapon = 'laser_green';
-  this.game.input.keyboard.onDownCallback = function(e) {  
+  this.game.input.keyboard.onDownCallback = function(e) {
 
   	if(e.keyCode == 49){
   		this.game.global.currentWeapon = 'laser_green';
   	}
   	if(e.keyCode == 50){
   		this.game.global.currentWeapon = 'laser_blue';
-  	} 
+  	}
   	if(e.keyCode == 27){
   		if(this.game.paused){
   			this.game.paused = false;
@@ -44,7 +44,7 @@ game.create = function () {
   if(this.game.global.level >= 2){
   	this.deploySecondEnemy = true;
   }
-  
+
   if(this.game.global.level == 1 && this.game.global.ship == 'ship2'){
   	this.game.global.life = 4;
   }
@@ -78,14 +78,14 @@ game.create = function () {
   this.meteors.enableBody = true;
   this.game.physics.arcade.enable(this.meteors);
   this.nextMeteor = 0;
-  
+
 
   // Add player
   this.player = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY + 100, this.game.global.ship);
   this.player.anchor.setTo(0.5, 0.5);
   this.player.scale.setTo(0.5,0.5);
   this.game.physics.arcade.enable(this.player);
-  this.player.body.drag.set(800);
+	this.player.body.drag.set(60 0);
   this.player.body.maxVelocity.set(this.speedPlayer);
   this.player.invincible = false;
   this.player.body.collideWorldBounds = true;
@@ -149,7 +149,7 @@ game.create = function () {
 	  }
 	  this.secondEnemies.enableBody = true;
 	  this.game.physics.arcade.enable(this.secondEnemies);
-	  this.nextSecondEnemy = 0;	
+	  this.nextSecondEnemy = 0;
 
 	    // Lasers
 	    this.weaponEnemy = this.game.add.weapon(30, 'laser');
@@ -164,7 +164,7 @@ game.create = function () {
 	    }, this);
 	    this.weaponEnemy.bulletAngleOffset = 90;
     }
-    
+
 
   // Lasers
   this.weapon = this.game.add.weapon(30, 'laser_green');
@@ -372,7 +372,7 @@ game.update = function () {
 			this.game.physics.arcade.overlap(this.weaponBlue.bullets, this.secondEnemies, this.damageEnemy,
 			  null, this);
 		}
-		
+
 		this.game.physics.arcade.overlap(this.weapon.bullets, this.meteors, this.touchMeteor,
 			null, this);
 		this.game.physics.arcade.overlap(this.weaponBlue.bullets, this.meteors, this.touchMeteor,
@@ -419,7 +419,7 @@ game.update = function () {
 		if (this.nextEnemy < this.game.time.now) {
 			this.addEnemy();
 			this.nextEnemy = this.game.time.now + this.delayEnemy;
-		}	
+		}
 
 		// Second Ennemies spawn
 		if(this.deploySecondEnemy){
@@ -428,17 +428,19 @@ game.update = function () {
 				this.nextSecondEnemy = this.game.time.now + this.delaySecondEnemy;
 			}
 		}
-		
+
 	}
-	
+
 	// Player movement
   if ( (cursors.up.isDown || this.wasd.up.isDown))
   {
 		this.player.body.acceleration.y = -this.speedPlayer;
+		this.player.body.acceleration.x = 0;
   }
   else if ( (cursors.down.isDown || this.wasd.down.isDown))
   {
-  	this.player.body.acceleration.y = this.speedPlayer;
+		this.player.body.acceleration.y = this.speedPlayer;
+		this.player.body.acceleration.x = 0;
   }
 
   else if (cursors.left.isDown || this.wasd.left.isDown)
@@ -453,8 +455,7 @@ game.update = function () {
   }
   else
   {
-	this.player.body.acceleration.x = 0;
-	this.player.body.acceleration.y = 0;
+		this.player.body.acceleration.set(0);
   }
 
   // Boss mouvement
@@ -495,7 +496,7 @@ game.update = function () {
 				else{
 					this.weapon.fire();
 				}
-			} 
+			}
 			else if(this.playerBonus == 'multiammo'){
 				this.weapon.fireRate = 0;
 				if (this.nextShotAt > this.time.now) return;
@@ -506,7 +507,7 @@ game.update = function () {
 					var left = new Phaser.Point(this.player.position.x - (10+i*6), this.player.position.y - 20);
 					this.weapon.fireAngle = -95 - i*10;
 					this.weapon.fire(left);
-								
+
 					var right = new Phaser.Point(this.player.position.x + (10+i*6), this.player.position.y - 20);
 					this.weapon.fireAngle = -85 + i*10;
 					this.weapon.fire(right);
@@ -533,7 +534,7 @@ game.update = function () {
 				this.weaponEnemy.fireAtSprite(this.player);
 				//this.weaponEnemy.fire(enemy);
 			}
-		}, this);	
+		}, this);
 	}
 
 	// Shield
@@ -541,14 +542,14 @@ game.update = function () {
 
 		if(this.deployBoss){
 			this.game.physics.arcade.overlap(this.shield, this.weaponBoss.bullets, this.destroyBullet,
-			  null, this);	
+			  null, this);
 		}
 
 		if(this.deploySecondEnemy){
 			this.game.physics.arcade.overlap(this.shield, this.weaponEnemy.bullets, this.destroyBullet,
-			  null, this);	
+			  null, this);
 		}
-		
+
 		this.game.physics.arcade.overlap(this.shield, this.enemies, this.damageEnemy,
 			null, this);
 		if(this.deploySecondEnemy){
@@ -560,7 +561,7 @@ game.update = function () {
 
 	if(this.deployBoss){
 		this.bossLifeBar.x = this.boss.x;
-		this.bossLifeBar.y = this.boss.y - 100;	
+		this.bossLifeBar.y = this.boss.y - 100;
 	}
 
 	  this.meteors.forEach((b) => {
@@ -648,7 +649,7 @@ game.playerDie = function() {
 
 	if(!this.player.invincible){
 
-		this.emitter.forEach (function(particle){ 
+		this.emitter.forEach (function(particle){
 			particle.key = 'pixel';
 			particle.loadTexture('pixel', 0);
 		}, this);
@@ -685,7 +686,7 @@ game.damageEnemy = function(sprite, enemy) {
 	enemyX = enemy.x;
 	enemyY = enemy.y;
 
-	this.emitter.forEach (function(particle){ 
+	this.emitter.forEach (function(particle){
 		particle.key = 'pixel';
 		particle.loadTexture('pixel', 0);
 	}, this);
@@ -699,7 +700,7 @@ game.damageEnemy = function(sprite, enemy) {
 	enemy.tint = '0xff5c5c';
     this.game.time.events.add(100, this.resetTint, this, enemy);
 
-	enemy.children[0].scale.setTo( (enemy.healthPoint / this.maxEnemyLife ) , 1);	
+	enemy.children[0].scale.setTo( (enemy.healthPoint / this.maxEnemyLife ) , 1);
 
 	if(enemy.healthPoint <= 0){
 
@@ -715,7 +716,7 @@ game.damageEnemy = function(sprite, enemy) {
 		this.game.add.tween(this.pointsLabel).to( { alpha: 1 }, 1200, "Linear", true);
 		this.game.add.tween(this.pointsLabel).to( { y: (enemyY - 30) }, 1000, "Linear", true);
 		this.game.time.events.add(1200, this.removeTextPoint, this, this.pointsLabel);
- 	   
+
 		if(this.playerBonus == '' && this.bonusDropped == false){
 			this.dropBonus(enemyX, enemyY);
 		}
@@ -768,7 +769,7 @@ game.addMeteor = function() {
 		meteor.healthPoint = 3;
 	}
 
-	var direction = this.game.rnd.pick(['horizontal', 'vertical']); 
+	var direction = this.game.rnd.pick(['horizontal', 'vertical']);
 	if(direction == 'vertical'){
 		meteor.reset(this.game.rnd.pick([200, 300, 400, 500, 600]), 0);
 		meteor.body.velocity.y = this.game.rnd.pick([100, 150]);
@@ -779,7 +780,7 @@ game.addMeteor = function() {
 		meteor.body.velocity.y = this.game.rnd.pick([25, 50, 75]) * this.game.rnd.pick([-1, 1]);
 		meteor.body.velocity.x = this.game.rnd.pick([100, 150]);
 	}
-	
+
 	meteor.checkWorldBounds = true;
 	meteor.outOfBoundsKill = true;
 },
@@ -793,13 +794,13 @@ game.touchMeteor = function(laser, meteor) {
 
 	if(meteor.key == 'meteor_grey' || meteor.key == 'meteor_grey_med'){
 
-		this.emitter.forEach (function(particle){ 
+		this.emitter.forEach (function(particle){
 			particle.key = 'pixel_grey';
 			particle.loadTexture('pixel_grey', 0);
 		}, this);
 	}
 	else{
-		this.emitter.forEach (function(particle){ 
+		this.emitter.forEach (function(particle){
 			particle.key = 'pixel_brown';
 			particle.loadTexture('pixel_brown', 0);
 		}, this);
@@ -886,7 +887,7 @@ game.dropBonus = function(spriteX, spriteY){
 				else if(this.game.global.life < 4){
 					bonusKey = 'pill';
 				}
-				
+
 				break;
 		}
 		if(bonusKey != ''){
@@ -922,7 +923,7 @@ game.damageBoss = function(boss, laser) {
   	this.boss.healthPoint -= 4;
   }
 
-  this.bossLifeBar.scale.setTo( (this.boss.healthPoint / this.maxBossLife ) , 1); 
+  this.bossLifeBar.scale.setTo( (this.boss.healthPoint / this.maxBossLife ) , 1);
 
   // Not sure ..
   this.boss.tint = '0xff5c5c';
@@ -953,7 +954,7 @@ game.damageBoss = function(boss, laser) {
 		this.game.add.tween(this.newShipLabel).to( { alpha: 1 }, 2000, "Linear", true);
 		this.game.time.events.add(3000, this.fadeOutUnlock, this);
 	}
-    
+
     this.finish = true;
 
     this.bossDeath.x = boss.x;
