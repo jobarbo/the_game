@@ -85,7 +85,7 @@ game.create = function () {
   this.player.anchor.setTo(0.5, 0.5);
   this.player.scale.setTo(0.5,0.5);
   this.game.physics.arcade.enable(this.player);
-	this.player.body.drag.set(60 0);
+	this.player.body.drag.set(600);
   this.player.body.maxVelocity.set(this.speedPlayer);
   this.player.invincible = false;
   this.player.body.collideWorldBounds = true;
@@ -434,28 +434,28 @@ game.update = function () {
 	// Player movement
   if ( (cursors.up.isDown || this.wasd.up.isDown))
   {
-		this.player.body.acceleration.y = -this.speedPlayer;
-		this.player.body.acceleration.x = 0;
+		this.player.body.velocity.y = -this.speedPlayer;
+		//this.player.body.acceleration.x = 0;
   }
   else if ( (cursors.down.isDown || this.wasd.down.isDown))
   {
-		this.player.body.acceleration.y = this.speedPlayer;
-		this.player.body.acceleration.x = 0;
+		this.player.body.velocity.y = this.speedPlayer;
+		//this.player.body.acceleration.x = 0;
   }
 
   else if (cursors.left.isDown || this.wasd.left.isDown)
   {
-    this.player.body.acceleration.x = -this.speedPlayer;
-    this.player.body.acceleration.y = 0;
+    this.player.body.velocity.x = -this.speedPlayer;
+    //this.player.body.acceleration.y = 0;
   }
   else if (cursors.right.isDown || this.wasd.right.isDown)
   {
-    this.player.body.acceleration.x = this.speedPlayer;
-    this.player.body.acceleration.y = 0;
+    this.player.body.velocity.x = this.speedPlayer;
+    //this.player.body.acceleration.y = 0;
   }
   else
   {
-		this.player.body.acceleration.set(0);
+		this.player.body.velocity.set(0);
   }
 
   // Boss mouvement
